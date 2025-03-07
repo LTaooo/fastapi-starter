@@ -2,10 +2,10 @@ from fastapi import APIRouter
 
 from core.dto.common_res import CommonRes
 from core.dto.page_res import PageRes
-from dto.request.book_get_req import BookGetReq
-from dto.request.book_list_req import BookListReq
-from dto.response.book_get_res import BookGetRes
-from service.book_service import BookService
+from app.dto.request.book_get_req import BookGetReq
+from app.dto.request.book_list_req import BookListReq
+from app.dto.response.book_get_res import BookGetRes
+from app.service.book_service import BookService
 from core.response import Response
 
 router = APIRouter()

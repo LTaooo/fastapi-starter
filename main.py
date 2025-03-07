@@ -2,8 +2,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request, status
 from starlette.responses import JSONResponse
 
-from controller import book_controller
-from exception.runtime_exception import RuntimeException
+from app.controller import book_controller
+from core.exception.runtime_exception import RuntimeException
 from core.response import Response
 
 app = FastAPI()

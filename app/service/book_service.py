@@ -1,6 +1,6 @@
-from dto.request.book_list_req import BookListReq
-from model.book import Book
-from repository.book_repository import BookRepository
+from app.dto.request.book_list_req import BookListReq
+from app.model.book import Book
+from app.repository.book_repository import BookRepository
 
 
 class BookService:

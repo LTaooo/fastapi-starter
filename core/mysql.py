@@ -1,27 +1,11 @@
 import os
-from abc import abstractmethod, ABC, ABCMeta
 from typing import Optional
 from urllib.parse import quote_plus
-
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
-from sqlalchemy.orm import sessionmaker
 
-load_dotenv()
-
-
-class SingletonMeta(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class SingletonABCMeta(ABCMeta, SingletonMeta):
-    pass
+from core.singleton_meta import SingletonMeta
 
 
 class MysqlConfig(BaseModel):
@@ -33,11 +17,11 @@ class MysqlConfig(BaseModel):
     echo: bool
 
 
-class Mysql(metaclass=SingletonABCMeta):
+class Mysql(metaclass=SingletonMeta):
     _engine: Optional[AsyncEngine]
-    # session: sessionmaker[AsyncSession]
 
-    def _get_config(self) -> "MysqlConfig":
+    @classmethod
+    def _get_config(cls) -> "MysqlConfig":
         load_dotenv()
         return MysqlConfig(
             hostname=os.getenv("MYSQL_HOST"),
@@ -56,9 +40,6 @@ class Mysql(metaclass=SingletonABCMeta):
             max_overflow=10,
             echo=config.echo
         )
-        # self.session = sessionmaker(
-        #     self._engine, expire_on_commit=False, class_=AsyncSession
-        # )
 
     def session(self):
         return AsyncSession(self._engine)

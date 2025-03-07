@@ -1,8 +1,8 @@
 from sqlmodel import select
 
 from core.mysql import Mysql
-from dto.request.book_list_req import BookListReq
-from model.book import Book
+from app.dto.request.book_list_req import BookListReq
+from app.model.book import Book
 
 
 class BookRepository:
