@@ -10,7 +10,7 @@
 
 3. 更新依赖
     ```shell
-    conda env export  --from-history  > environment.yml 
+    conda env export   --no-builds  > environment.yml
     ```
 4. 启动
     ```shell
