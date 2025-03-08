@@ -3,7 +3,8 @@ from typing import Optional
 from urllib.parse import quote_plus
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from core.singleton_meta import SingletonMeta
 
@@ -41,5 +42,5 @@ class Mysql(metaclass=SingletonMeta):
             echo=config.echo
         )
 
-    def session(self):
+    def session(self) -> AsyncSession:
         return AsyncSession(self._engine)

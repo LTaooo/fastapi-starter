@@ -5,6 +5,7 @@ from starlette.responses import JSONResponse
 from app.controller import book_controller
 from core.exception.runtime_exception import RuntimeException
 from core.response import Response
+from core.status_enum import StatusEnum
 
 app = FastAPI()
 app.include_router(book_controller.router)
@@ -22,9 +23,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         })
 
     return JSONResponse(status_code=status.HTTP_200_OK,
-                        content=Response.error(message=str(error_details), code=status.HTTP_422_UNPROCESSABLE_ENTITY).model_dump())
+                        content=Response.error(message=str(error_details), code=StatusEnum.validate_fail).model_dump())
 
 
 @app.exception_handler(RuntimeException)
 async def runtime_exception_handler(request: Request, exc: RuntimeException):
     return JSONResponse(status_code=status.HTTP_200_OK, content=Response.error(message=exc.message, code=exc.code).model_dump())
+
+@app.exception_handler(Exception)
+async def runtime_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(status_code=status.HTTP_200_OK, content=Response.error(message="系统内部错误", code=StatusEnum.error).model_dump())
