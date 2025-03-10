@@ -1,8 +1,8 @@
-from starlette import status
+from core.status_enum import StatusEnum
 
 
 class RuntimeException(Exception):
-    def __init__(self, message: str, code: status = status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(self, message: str, code: StatusEnum = StatusEnum.error):
         self.message = message
         self.code = code
 
