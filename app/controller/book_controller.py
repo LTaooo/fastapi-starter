@@ -14,12 +14,11 @@ router = APIRouter()
 @router.post("/book/get", response_model=CommonRes[BookGetRes], summary="根据id获取书")
 async def get(param: BookGetReq):
     model = await BookService.get(param.id)
-    return Response.success(BookGetRes.from_model(model))
+    return Response.success(BookGetRes.from_model(model) if model else None)
 
 
 @router.post("/book/list", response_model=CommonRes[PageRes[BookGetRes]], summary="获取书籍分页列表")
 async def list_book(param: BookListReq):
-    data = await BookService.list(param)
-    # result = PageRes.from_page(param, BookGetRes.from_model_list(data))
-    result = BookGetRes.model_to_page(param, data)
+    data = await BookService.page_list(param)
+    result = BookGetRes.from_page_resource(data)
     return Response.success(result)

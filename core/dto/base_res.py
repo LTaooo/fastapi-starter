@@ -1,26 +1,27 @@
 from abc import ABC
-from typing import TypeVar
+from typing import Generic, TypeVar
 from pydantic import BaseModel
 
-from core.dto.page_req import PageReq
 from core.dto.page_res import PageRes
+from core.mysql.page_resource import PageResource
 
 T = TypeVar('T', bound=BaseModel)
 
 
-class BaseRes(ABC, BaseModel):
+class BaseRes(ABC, BaseModel, Generic[T]):
 
     # noinspection PyArgumentList
     @classmethod
-    def from_model_list(cls, data: list[T]) -> list["BaseRes"]:
+    def from_model_list(cls, data: list[T]) -> list["BaseRes|None"]:
         # 使用 cls 来实例化具体的子类对象
-        return [cls(**model.model_dump()) for model in data]
+        return [cls.from_model(model) for model in data]
 
     # noinspection PyArgumentList
     @classmethod
-    def from_model(cls, data: T | None) -> list["BaseRes"] | None:
-        return None if data is None else cls(**data.model_dump())
-
+    def from_model(cls, data: T) -> "BaseRes":
+        return cls(**data.model_dump())       
+    
+    
     @classmethod
-    def model_to_page(cls, page: PageReq, data: list[T]) -> "PageRes[T]":
-        return PageRes.from_page(page, cls.from_model_list(data))
+    def from_page_resource(cls, data: PageResource) -> "PageRes[T]":
+        return PageRes.from_page(cls.from_model_list(data.data), data.page, data.limit, data.total)
