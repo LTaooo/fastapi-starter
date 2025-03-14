@@ -1,18 +1,15 @@
-1. 生成conda环境
+1. 生成uv环境
     ```shell
-    conda env create -f environment.yml
+    uv venv
+   .venv\Scripts\activate
     ```
 
 2. 安装包
     ```shell
-    conda install -c conda-forge aiomysql 
+    uv add pytest --dev
     ```
 
-3. 更新依赖
-    ```shell
-    conda env export   --no-builds  > environment.yml
-    ```
-4. 启动
+3. 启动
     ```shell
    测试环境: uvicorn main:app --reload
    测试环境: fastapi dev
