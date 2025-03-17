@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 from sqlalchemy import Select, func
 from sqlmodel import SQLModel, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from core.mysql.mysql import Mysql
 from core.mysql.page_resource import PageResource
@@ -14,6 +15,10 @@ class BaseRepository(Generic[T], ABC):
     @abstractmethod
     def _get_client(cls) -> Mysql:
         raise NotImplementedError
+
+    @classmethod
+    def _get_session(cls) -> AsyncSession:
+        return cls._get_client().session()
 
     @classmethod
     async def _for_page(cls, page: int, limit: int, sql: Select) -> PageResource[T]:
