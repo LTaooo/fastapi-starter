@@ -16,7 +16,7 @@ class BookController:
     @router.post('/get', response_model=CommonRes[BookGetRes], summary='根据id获取书')
     async def get(param: BookGetReq):
         model = await BookService.get(param.id)
-        return Response.success(BookGetRes.from_model(model) if model else None)
+        return Response.success(BookGetRes.from_model_or_none(model))
 
     @staticmethod
     @router.post('/list', response_model=CommonRes[PageRes[BookGetRes]], summary='获取书籍分页列表')
