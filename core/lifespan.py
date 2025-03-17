@@ -7,7 +7,15 @@ from core.mysql.mysql import Mysql
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    mysql = Mysql()
+    await _before_startup()
     yield
+    await _after_startup()
+
+
+async def _before_startup():
+    Mysql()
+
+
+async def _after_startup():
+    await Mysql().close()
     Context.clear()
-    await mysql.close()

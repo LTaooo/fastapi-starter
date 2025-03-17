@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-
 from core.dto.common_res import CommonRes
 from core.dto.page_res import PageRes
 from app.dto.request.book_get_req import BookGetReq
