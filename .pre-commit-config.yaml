@@ -1,11 +1,11 @@
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  # Ruff version.
-  rev: v0.11.0
-  hooks:
-    # Run the linter.
-    - id: ruff
-      types_or: [ python, pyi ]
-      args: [ --fix ]
-    # Run the formatter.
-    - id: ruff-format
-      types_or: [ python, pyi ]
+repos:
+  - repo: git@github.com:astral-sh/ruff-pre-commit.git
+    # Ruff version.
+    rev: v0.11.0
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [ --fix, --config, ruff.toml ]
+      # Run the formatter.
+      - id: ruff-format
+        args: [ --config, ruff.toml ]
