@@ -14,7 +14,7 @@ class BookControllerTest(TestCase):
         assert response.json()["code"] == StatusEnum.success.value
         assert response.json()["data"] is not None
 
-    def test_list_book(self):
+    def test_list(self):
         response = self.client.post("/api/book/list", json={"page": 1, "limit": 1})
         assert response.status_code == 200
         assert response.json()["code"] == StatusEnum.success.value
