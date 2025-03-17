@@ -15,3 +15,8 @@
    测试环境: fastapi dev
    生产环境: fastapi run
    ```
+
+4. 安装hook
+   ```shell
+     pre-commit install
+   ```
