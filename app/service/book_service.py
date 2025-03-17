@@ -12,7 +12,7 @@ class BookService:
     @classmethod
     async def list(cls, req: BookListReq) -> list[Book]:
         return await BookRepository.list(req)
-    
+
     @classmethod
     async def page_list(cls, req: BookListReq) -> PageResource[Book]:
         return await BookRepository.page_list(req)

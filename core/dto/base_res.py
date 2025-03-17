@@ -9,19 +9,17 @@ T = TypeVar('T', bound=BaseModel)
 
 
 class BaseRes(ABC, BaseModel, Generic[T]):
-
     # noinspection PyArgumentList
     @classmethod
-    def from_model_list(cls, data: list[T]) -> list["BaseRes|None"]:
+    def from_model_list(cls, data: list[T]) -> list['BaseRes|None']:
         # 使用 cls 来实例化具体的子类对象
         return [cls.from_model(model) for model in data]
 
     # noinspection PyArgumentList
     @classmethod
-    def from_model(cls, data: T) -> "BaseRes":
-        return cls(**data.model_dump())       
-    
-    
+    def from_model(cls, data: T) -> 'BaseRes':
+        return cls(**data.model_dump())
+
     @classmethod
-    def from_page_resource(cls, data: PageResource) -> "PageRes[T]":
+    def from_page_resource(cls, data: PageResource) -> 'PageRes[T]':
         return PageRes.from_page(cls.from_model_list(data.data), data.page, data.limit, data.total)

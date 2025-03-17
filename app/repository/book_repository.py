@@ -8,11 +8,10 @@ from core.mysql.page_resource import PageResource
 
 
 class BookRepository(BaseRepository[Book]):
-    
     @classmethod
     def _get_client(cls) -> Mysql:
         return Mysql()
-    
+
     @classmethod
     async def find(cls, ident: int) -> Book | None:
         async with cls._get_client().session() as session:

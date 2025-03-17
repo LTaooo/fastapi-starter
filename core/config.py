@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 from typing import Type, TypeVar
 
-T = TypeVar("T", bound=BaseSettings)
+T = TypeVar('T', bound=BaseSettings)
 
 
 class Config:
