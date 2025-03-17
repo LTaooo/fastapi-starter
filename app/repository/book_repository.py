@@ -1,6 +1,6 @@
 from sqlmodel import select
 
-from app.model.base_repository import BaseRepository
+from core.mysql.base_repository import BaseRepository
 from core.mysql.mysql import Mysql
 from app.dto.request.book_list_req import BookListReq
 from app.model.book import Book
