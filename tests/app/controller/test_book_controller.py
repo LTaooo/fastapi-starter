@@ -1,14 +1,15 @@
+from httpx import AsyncClient
 from core.status_enum import StatusEnum
 
 
-async def test_get(client):
+async def test_get(client: AsyncClient):
     response = await client.post('/api/book/get', json={'id': 1})
     assert response.status_code == 200
     assert response.json()['code'] == StatusEnum.success.value
     assert response.json()['data'] is not None
 
 
-async def test_list(client):
+async def test_list(client: AsyncClient):
     response = await client.post('/api/book/list', json={'page': 1, 'limit': 1})
     assert response.status_code == 200
     assert response.json()['code'] == StatusEnum.success.value

@@ -14,15 +14,17 @@ class BookRepository(BaseRepository[Book]):
 
     @classmethod
     async def find(cls, ident: int) -> Book | None:
-        async with cls._get_client().session() as session:
+        async for session in cls._get_session():
             return await session.get(Book, ident)
 
     @classmethod
     async def list(cls, req: BookListReq) -> list[Book]:
-        async with cls._get_client().session() as session:
+        books: list[Book] = []
+        async for session in cls._get_session():
             sql = select(Book).offset(req.get_offset()).limit(req.limit)
             result = await session.exec(sql)
-            return list(result.all())
+            books = list(result.all())
+        return books
 
     @classmethod
     async def page_list(cls, req: BookListReq) -> PageResource[Book]:

@@ -1,3 +1,4 @@
+from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -18,8 +19,12 @@ class Mysql(metaclass=SingletonMeta):
             echo=config.echo,
         )
 
-    def session(self) -> AsyncSession:
-        return AsyncSession(self._engine)
+    async def session(self) -> AsyncGenerator[AsyncSession, None]:
+        session = AsyncSession(self._engine)
+        try:
+            yield session
+        finally:
+            await session.close()
 
     async def close(self):
         await self._engine.dispose()
