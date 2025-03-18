@@ -1,12 +1,11 @@
+from typing import Generic
 from pydantic import BaseModel
-from sqlmodel import SQLModel
-from typing import Generic, TypeVar
 
-T = TypeVar('T', bound=SQLModel)
+from app.types.types import SQL_MODEL_TYPE
 
 
-class PageResource(BaseModel, Generic[T]):
+class PageResource(BaseModel, Generic[SQL_MODEL_TYPE]):
     total: int
-    data: list[T]
+    data: list[SQL_MODEL_TYPE]
     limit: int
     page: int
