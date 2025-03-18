@@ -1,6 +1,7 @@
 {
     "venv": ".venv",
     "venvPath": ".",
+    "typeCheckingMode": "basic",
     "include": [
         "app",
         "config",
