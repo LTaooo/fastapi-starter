@@ -2,6 +2,7 @@
     ```shell
     uv venv
    .venv\Scripts\activate
+   uv run uvicorn main:app
     ```
 
 2. 安装包
