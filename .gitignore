@@ -4,3 +4,4 @@ logs/
 *.diff
 .idea
 __pycache__
+build
