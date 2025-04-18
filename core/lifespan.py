@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from core.context import Context
-from core.mysql.mysql import Mysql
+from core.mysql.database.book.book_database import BookDatabase
 
 
 @asynccontextmanager
@@ -13,9 +13,9 @@ async def lifespan(app: FastAPI):
 
 
 async def _before_startup():
-    Mysql()
+    BookDatabase()
 
 
 async def _after_startup():
-    await Mysql().close()
+    await BookDatabase().close()
     Context.clear()

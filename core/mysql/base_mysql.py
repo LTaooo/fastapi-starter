@@ -1,3 +1,4 @@
+from abc import ABC, ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
@@ -5,10 +6,15 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from config.mysql_config import MysqlConfig
 from core.config import Config
+from core.mysql.base_mysql_session import BaseMysqlSession
 from core.singleton_meta import SingletonMeta
 
 
-class Mysql(metaclass=SingletonMeta):
+class SingletonABCMeta(ABCMeta, SingletonMeta):
+    pass
+
+
+class BaseMysql(ABC, metaclass=SingletonABCMeta):
     _engine: AsyncEngine
 
     def __init__(self):
@@ -19,6 +25,10 @@ class Mysql(metaclass=SingletonMeta):
             max_overflow=10,
             echo=config.echo,
         )
+
+    @abstractmethod
+    def get_config(self) -> Config:
+        raise NotImplementedError()
 
     @asynccontextmanager
     async def _session(self) -> AsyncGenerator[AsyncSession, None]:
@@ -40,21 +50,21 @@ class Mysql(metaclass=SingletonMeta):
         finally:
             await session.close()
 
-    async def session(self) -> AsyncGenerator[AsyncSession, None]:
+    @abstractmethod
+    async def session(self) -> AsyncGenerator[BaseMysqlSession, None]:
         """
         获取一个异步MySQL会话, 不会自动commit和rollback, 如果涉及写操作, 需要手动commit
         :return:
         """
-        async with self._session() as session:
-            yield session
+        raise NotImplementedError()
 
-    async def auto_commit_session(self) -> AsyncGenerator[AsyncSession, None]:
+    @abstractmethod
+    async def auto_commit_session(self) -> AsyncGenerator[BaseMysqlSession, None]:
         """
         获取一个异步MySQL会话, 会自动commit和rollback
         :return:
         """
-        async with self._auto_commit_session() as session:
-            yield session
+        raise NotImplementedError()
 
     async def close(self):
         await self._engine.dispose()
