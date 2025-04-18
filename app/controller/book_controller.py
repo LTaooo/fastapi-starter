@@ -17,20 +17,24 @@ router = APIRouter(prefix='/api/book', tags=['book'])
 
 class BookController:
     @staticmethod
-    @router.post('/get', response_model=CommonRes[BookGetRes], summary='根据id获取书')
-    async def get(param: BookGetReq, session: BookSession = Depends(BookDatabase().session)):
+    @router.post('/get', summary='根据id获取书')
+    async def get(param: BookGetReq, session: BookSession = Depends(BookDatabase().session)) -> CommonRes[BookGetRes]:
         model = await BookService.get(session, param.id)
         return Response.success(BookGetRes.from_model_or_none(model))
 
     @staticmethod
-    @router.post('/list', response_model=CommonRes[PageRes[BookGetRes]], summary='获取书籍分页列表')
-    async def list(param: BookListReq, session: BookSession = Depends(BookDatabase().session)):
+    @router.post('/list', summary='获取书籍分页列表')
+    async def list(
+        param: BookListReq, session: BookSession = Depends(BookDatabase().session)
+    ) -> CommonRes[PageRes[BookGetRes]]:
         data = await BookService.page_list(session, param)
         result = BookGetRes.from_page_resource(data)
         return Response.success(result)
 
     @staticmethod
-    @router.post('/create', response_model=CommonRes[BookGetRes], summary='创建书籍')
-    async def create(param: BookCreateReq, session: BookSession = Depends(BookDatabase().auto_commit_session)):
+    @router.post('/create', summary='创建书籍')
+    async def create(
+        param: BookCreateReq, session: BookSession = Depends(BookDatabase().auto_commit_session)
+    ) -> CommonRes[BookGetRes]:
         model = await BookService.create(session, param)
         return Response.success(BookGetRes.from_model(model))
