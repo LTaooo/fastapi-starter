@@ -1,10 +1,14 @@
 from sqlmodel import select
 
+from app.dto.request.book_create_req import BookCreateReq
 from core.mysql.base_repository import BaseRepository
 from core.mysql.mysql import Mysql
 from app.dto.request.book_list_req import BookListReq
 from app.model.book import Book
 from core.mysql.page_resource import PageResource
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from core.util.datetime import DateTime
 
 
 class BookRepository(BaseRepository[Book]):
@@ -13,20 +17,25 @@ class BookRepository(BaseRepository[Book]):
         return Mysql()
 
     @classmethod
-    async def find(cls, ident: int) -> Book | None:
-        async for session in cls._get_session():
-            return await session.get(Book, ident)
+    async def find(cls, session: AsyncSession, ident: int) -> Book | None:
+        return await session.get(Book, ident)
 
     @classmethod
-    async def list(cls, req: BookListReq) -> list[Book]:
+    async def list(cls, session: AsyncSession, req: BookListReq) -> list[Book]:
         books: list[Book] = []
-        async for session in cls._get_session():
-            sql = select(Book).offset(req.get_offset()).limit(req.limit)
-            result = await session.exec(sql)
-            books = list(result.all())
+        sql = select(Book).offset(req.get_offset()).limit(req.limit)
+        result = await session.exec(sql)
+        books = list(result.all())
         return books
 
     @classmethod
-    async def page_list(cls, req: BookListReq) -> PageResource[Book]:
+    async def create(cls, session: AsyncSession, req: BookCreateReq) -> Book:
+        book = Book(name=req.name, created_at=DateTime.now(), updated_at=DateTime.now())
+        session.add(book)
+        await session.flush()
+        return book
+
+    @classmethod
+    async def page_list(cls, session: AsyncSession, req: BookListReq) -> PageResource[Book]:
         sql = select(Book)
-        return await cls._for_page(req.page, req.limit, sql)
+        return await cls._for_page(session, req.page, req.limit, sql)
