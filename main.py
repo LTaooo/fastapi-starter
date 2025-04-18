@@ -1,4 +1,7 @@
+# ruff: noqa: E402
 from dotenv import load_dotenv
+
+load_dotenv()
 from fastapi import FastAPI
 from app.controller import book_controller
 from config.app_config import AppConfig
@@ -10,7 +13,7 @@ from core.openapi import openapi
 from core.response import Response
 from core.status_enum import StatusEnum
 
-load_dotenv()
+
 app_config = Config.get(AppConfig)
 app = FastAPI(
     lifespan=lifespan,

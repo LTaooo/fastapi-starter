@@ -10,9 +10,7 @@ from app.types.types import SQL_MODEL_TYPE
 
 class BaseRepository(Generic[SQL_MODEL_TYPE], ABC):
     @classmethod
-    async def _for_page(
-        cls, session: BaseMysqlSession, page: int, limit: int, sql: Select
-    ) -> PageResource[SQL_MODEL_TYPE]:
+    async def _for_page(cls, session: BaseMysqlSession, page: int, limit: int, sql: Select) -> PageResource[SQL_MODEL_TYPE]:
         page_resource: PageResource[SQL_MODEL_TYPE] = PageResource(total=0, data=[], limit=limit, page=page)
         total = await session.get_session().exec(select(func.count()).select_from(sql.subquery()))
         sql = sql.offset(page).limit(limit)
