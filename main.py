@@ -4,7 +4,7 @@ from app.controller import book_controller
 from config.app_config import AppConfig
 from core.config import Config
 from core.context import Context
-from core.exception_handle import ExceptionHandler
+from core.exception.handle.exception_handle import ExceptionHandler
 from core.lifespan import lifespan
 from core.openapi import openapi
 from core.response import Response
