@@ -22,7 +22,6 @@ class BookRepository(BaseRepository[Book]):
 
     @classmethod
     async def list(cls, session: AsyncSession, req: BookListReq) -> list[Book]:
-        books: list[Book] = []
         sql = select(Book).offset(req.get_offset()).limit(req.limit)
         result = await session.exec(sql)
         books = list(result.all())
