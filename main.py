@@ -12,6 +12,7 @@ from core.lifespan import lifespan
 from core.openapi import openapi
 from core.response import Response
 from core.status_enum import StatusEnum
+import uvicorn
 
 
 app_config = Config.get(AppConfig)
@@ -36,3 +37,7 @@ ExceptionHandler.register_exception_handler(app)
 def default_route(path: str):
     """缺省路由"""
     return Response.error(message=f'{path} not found', code=StatusEnum.error)
+
+
+if __name__ == '__main__':
+    uvicorn.run('main:app', host='0.0.0.0', port=8000, workers=2)
