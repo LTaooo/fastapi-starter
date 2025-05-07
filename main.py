@@ -1,6 +1,8 @@
 # ruff: noqa: E402
 from dotenv import load_dotenv
 
+from core.logger import Logger
+
 load_dotenv()
 from fastapi import FastAPI
 from app.controller import book_controller
@@ -40,4 +42,5 @@ def default_route(path: str):
 
 
 if __name__ == '__main__':
+    Logger.get().error('项目启动中...')
     uvicorn.run('main:app', host='0.0.0.0', port=8000, workers=2)

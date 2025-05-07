@@ -8,6 +8,7 @@ dependencies = [
     "aiomysql>=0.2.0",
     "fastapi>=0.115.11",
     "gunicorn>=23.0.0",
+    "loguru>=0.7.3",
     "pydantic-settings>=2.8.1",
     "sqlmodel>=0.0.24",
     "uvicorn[standard]>=0.34.0",
