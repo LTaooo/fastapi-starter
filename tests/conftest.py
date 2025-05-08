@@ -2,8 +2,9 @@ from typing import AsyncGenerator
 import pytest
 from httpx import AsyncClient, ASGITransport
 
-from core.mysql.database.book.book_database import BookDatabase
 from main import app
+
+from core.mysql.database.book.book_database import BookDatabase
 
 
 @pytest.fixture(scope='function')

@@ -12,7 +12,7 @@
 
 3. 启动
     ```shell
-   测试环境: uvicorn main:app --reload
+   测试环境: uvicorn src.main:app --reload
    测试环境: fastapi dev
    生产环境: fastapi run
    ```
