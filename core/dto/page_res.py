@@ -2,7 +2,7 @@ from typing import Generic
 
 from pydantic import BaseModel, Field
 
-from app.types.types import MODEL_TYPE
+from core.types.types import MODEL_TYPE
 
 
 class PageRes(BaseModel, Generic[MODEL_TYPE]):

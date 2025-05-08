@@ -5,7 +5,7 @@ from sqlmodel import select
 
 from core.mysql.base_mysql_session import BaseMysqlSession
 from core.mysql.page_resource import PageResource
-from app.types.types import SQL_MODEL_TYPE
+from core.types.types import SQL_MODEL_TYPE
 
 
 class BaseRepository(Generic[SQL_MODEL_TYPE], ABC):

@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Generic, Self
 from pydantic import BaseModel
 
-from app.types.types import MODEL_TYPE, SQL_MODEL_TYPE
+from core.types.types import MODEL_TYPE, SQL_MODEL_TYPE
 from core.dto.page_res import PageRes
 from core.mysql.page_resource import PageResource
 

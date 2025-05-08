@@ -1,6 +1,9 @@
 from loguru import logger as loguru_logger
 import sys
 import os
+
+from config.app_config import AppConfig
+from core.config import Config
 from core.singleton_meta import SingletonMeta
 
 
@@ -8,7 +11,7 @@ class Logger(metaclass=SingletonMeta):
     __logger = loguru_logger
     _log_file: str
     _is_init: bool = False
-    service_name: str = 'fast-api'
+    service_name: str = Config.get(AppConfig).app_name
 
     @classmethod
     def init(cls):
