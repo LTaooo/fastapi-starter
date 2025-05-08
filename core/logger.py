@@ -8,6 +8,7 @@ class Logger(metaclass=SingletonMeta):
     __logger = loguru_logger
     _log_file: str
     _is_init: bool = False
+    service_name: str = 'fast-api'
 
     @classmethod
     def init(cls):
@@ -28,13 +29,14 @@ class Logger(metaclass=SingletonMeta):
             format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>',
             enqueue=True,
         )
+        cls.__logger = cls.__logger.bind(service=cls.service_name)
         cls.__logger.add(
             cls._log_file,
             level=level,
             rotation='100 MB',
             retention='10 days',
             encoding='utf-8',
-            format='{{"time":"{time:YYYY-MM-DD HH:mm:ss}","level":"{level}","message":"{message}","module":"{module}","file":"{file.path}","function":"{function}","line":"{line}"}}',
+            format='{{"timestamp":"{time:YYYY-MM-DDTHH:mm:ss.SSSZ}","level":"{level}","service":"{extra[service]}","thread":"{thread}","message":"{message}","logger":"{module}","file":"{file.path}","function":"{function}","line":"{line}"}}',
             enqueue=True,
         )
 
