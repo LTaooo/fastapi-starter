@@ -45,10 +45,6 @@ class Logger(metaclass=SingletonMeta):
         return cls.__logger
 
     @classmethod
-    def add_sink(cls, *args, **kwargs):
-        cls.get().add(*args, **kwargs)
-
-    @classmethod
     def find_project_root(cls, markers=('pyproject.toml', '.git')):
         """
         查找项目根目录
