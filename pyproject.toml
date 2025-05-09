@@ -2,7 +2,7 @@
 name = "fast-api-template"
 version = "0.1.0"
 description = "fastapi 脚手架"
-readme = "readme.md"
+readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiomysql>=0.2.0",
