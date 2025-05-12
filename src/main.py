@@ -7,7 +7,6 @@ from routes import routes
 from fastapi import FastAPI
 from config.app_config import AppConfig
 from core.config import Config
-from core.context import Context
 from core.exception.handle.exception_handle import ExceptionHandler
 from core.lifespan import lifespan
 from core.openapi import openapi
@@ -24,7 +23,6 @@ app = FastAPI(
 )
 ExceptionHandler.register_exception_handler(app)
 app.openapi = openapi(app.openapi)
-Context.init(app)
 routes.register(app)
 
 if __name__ == '__main__':
