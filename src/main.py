@@ -18,7 +18,9 @@ app = FastAPI(
     lifespan=lifespan,
     title=app_config.app_name,
     debug=app_config.app_debug,
-    responses={200: {'description': '请求参数错误'}},
+    responses={200: {'description': '成功'}},
+    docs_url='/docs' if not app_config.is_prod() else None,
+    openapi_url='/openapi.json' if not app_config.is_prod() else None,
 )
 ExceptionHandler.register_exception_handler(app)
 app.openapi = openapi(app.openapi)
