@@ -27,4 +27,5 @@ routes.register(app)
 
 if __name__ == '__main__':
     Logger.get().info('项目启动中...')
-    uvicorn.run('main:app', host='0.0.0.0', port=8000, workers=2)
+    config = Config.get(AppConfig)
+    uvicorn.run('main:app', host=config.host, port=config.port, workers=config.workers)

@@ -14,6 +14,9 @@ class AppConfig(BaseSettings):
     app_env: AppEnvEnum = Field(description='应用环境', default=AppEnvEnum.DEV)
     app_name: str = Field(description='应用名称', default='fastapi-template')
     app_debug: bool = Field(description='是否开启调试模式', default=False)
+    workers: int = Field(description='工作进程数', default=8)
+    host: str = Field(description='主机地址', default='0.0.0.0')
+    port: int = Field(description='端口号', default=8000)
 
     def is_prod(self) -> bool:
         return self.app_env == AppEnvEnum.PROD

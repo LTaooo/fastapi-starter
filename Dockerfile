@@ -12,4 +12,4 @@ RUN uv pip install . --system
 EXPOSE 8000
 
 # 启动应用
-CMD ["python", "main.py"]
+CMD ["python", "src/main.py"]
