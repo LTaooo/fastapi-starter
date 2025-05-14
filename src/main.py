@@ -1,7 +1,3 @@
-# ruff: noqa: E402
-from dotenv import load_dotenv
-
-load_dotenv()
 from core.logger import Logger
 from routes import routes
 from fastapi import FastAPI

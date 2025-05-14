@@ -3,7 +3,9 @@ from functools import lru_cache
 from pydantic_settings import BaseSettings
 
 from typing import Type, TypeVar
+from dotenv import load_dotenv
 
+load_dotenv()
 T = TypeVar('T', bound=BaseSettings)
 
 
