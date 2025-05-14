@@ -18,7 +18,7 @@ class Logger(metaclass=SingletonMeta):
         if cls._is_init:
             return
 
-        cls._log_file = os.path.join(cls.find_project_root(), 'runtime', 'app.log')
+        cls._log_file = os.path.join(cls.find_project_root(), 'logs', 'app.log')
         cls._is_init = True
         os.makedirs(os.path.dirname(cls._log_file), exist_ok=True)
 
