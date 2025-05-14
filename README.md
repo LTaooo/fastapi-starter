@@ -11,9 +11,8 @@
     ```
 2. 生成uv环境
     ```shell
-    uv venv
-   .venv\Scripts\activate
-   uv run uvicorn main:app
+    uv sync
+    uv run uvicorn main:app
     ```
 
 3. 安装包
