@@ -30,7 +30,7 @@ class NacosConfig(BaseSettings):
     username: str = Field(description='Nacos用户名', alias='NACOS_USERNAME', default='dev')
     password: str = Field(description='Nacos密码', alias='NACOS_PASSWORD', default='dev')
     log_level: str = Field(description='Nacos日志级别', alias='NACOS_LOG_LEVEL', default='ERROR')
-    log_dir: str = Field(description='Nacos日志目录', alias='NACOS_LOG_DIR', default='logs/nacos_naming_client.log')
+    log_dir: str = Field(description='Nacos日志目录', alias='NACOS_LOG_DIR', default='logs/nacos')
 
     def get_services_data(self) -> list[RegisterInstanceParam]:
         _app_config = Config.get(AppConfig)
