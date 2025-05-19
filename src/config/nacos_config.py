@@ -2,7 +2,7 @@ import tomllib
 from typing import Callable
 from pydantic import Field, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from v2.nacos import RegisterInstanceParam
+from v2.nacos import RegisterInstanceParam, ConfigParam
 
 from config.app_config import AppConfig
 from core.config import Config
@@ -21,6 +21,9 @@ async def _config_listener(tenant: str, data_id: str, group: str, content: str):
     print(content_dict)
 
 
+_app_config = Config.get(AppConfig)
+
+
 class NacosConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
     enable: bool = Field(description='是否启用Nacos', alias='NACOS_ENABLE', default=False)
@@ -33,7 +36,6 @@ class NacosConfig(BaseSettings):
     log_dir: str = Field(description='Nacos日志目录', alias='NACOS_LOG_DIR', default='logs/nacos')
 
     def get_services_data(self) -> list[RegisterInstanceParam]:
-        _app_config = Config.get(AppConfig)
         return [
             RegisterInstanceParam(
                 service_name=_app_config.app_name,
@@ -47,4 +49,10 @@ class NacosConfig(BaseSettings):
 
     @staticmethod
     def get_listener_data() -> list[NacosListenerConfig]:
-        return [NacosListenerConfig(data_id='fast-api-template-dev.toml', listener=_config_listener)]
+        return [NacosListenerConfig(data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yml', listener=_config_listener)]
+
+    def get_config_data(self) -> ConfigParam:
+        return ConfigParam(
+            data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yml',
+            group=self.group,
+        )

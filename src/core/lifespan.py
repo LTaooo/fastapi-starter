@@ -15,12 +15,16 @@ async def lifespan(app: FastAPI):
 
 
 async def _before_startup():
-    BookDatabase()
+    nacos_config = Config.get(NacosConfig)
+    # 从Nacos加载完整配置并更新全局配置对象
+    # 这会使所有从Nacos中获取的配置覆盖本地默认配置
+    await Nacos().init(nacos_config)
+    Config().update_config(await Nacos().get_config(nacos_config.get_config_data()))
+    BookDatabase.init()
     Redis().get_instance()
-    await Nacos().init(Config.get(NacosConfig))
 
 
 async def _after_startup():
-    await BookDatabase().close()
+    await BookDatabase.close()
     await Redis().disconnect()
     await Nacos().close()

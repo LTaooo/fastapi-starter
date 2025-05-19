@@ -1,8 +1,18 @@
 from typing import Callable
 
+import yaml
+
 from config.nacos_config import NacosConfig
 from core.singleton_meta import SingletonMeta
-from v2.nacos import NacosNamingService, NacosConfigService, ClientConfigBuilder, GRPCConfig, ClientConfig, RegisterInstanceParam
+from v2.nacos import (
+    NacosNamingService,
+    NacosConfigService,
+    ClientConfigBuilder,
+    GRPCConfig,
+    ClientConfig,
+    RegisterInstanceParam,
+    ConfigParam,
+)
 
 
 class Nacos(metaclass=SingletonMeta):
@@ -47,6 +57,12 @@ class Nacos(metaclass=SingletonMeta):
             .build()
         )
         return config
+
+    async def get_config(self, config_param: ConfigParam) -> dict:
+        if not self._config.enable:
+            return {}
+        data = await self._config_service.get_config(config_param)
+        return yaml.safe_load(data or '')
 
     async def close(self):
         if not self._config.enable:
