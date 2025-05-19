@@ -6,6 +6,7 @@ from v2.nacos import RegisterInstanceParam, ConfigParam
 
 from config.app_config import AppConfig
 from core.config import Config
+from core.util.helper import Helper
 
 
 class NacosListenerConfig(BaseModel):
@@ -33,7 +34,6 @@ class NacosConfig(BaseSettings):
     username: str = Field(description='Nacos用户名', alias='NACOS_USERNAME', default='dev')
     password: str = Field(description='Nacos密码', alias='NACOS_PASSWORD', default='dev')
     log_level: str = Field(description='Nacos日志级别', alias='NACOS_LOG_LEVEL', default='ERROR')
-    log_dir: str = Field(description='Nacos日志目录', alias='NACOS_LOG_DIR', default='logs/nacos')
 
     def get_services_data(self) -> list[RegisterInstanceParam]:
         return [
@@ -52,7 +52,12 @@ class NacosConfig(BaseSettings):
         return [NacosListenerConfig(data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yml', listener=_config_listener)]
 
     def get_config_data(self) -> ConfigParam:
-        return ConfigParam(
-            data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yml',
-            group=self.group,
-        )
+        return ConfigParam(data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yaml', group=self.group, type='yaml')
+
+    @staticmethod
+    def get_log_dir() -> str:
+        return Helper.with_root_path(['logs', 'nacos', 'app.log'])
+
+    @staticmethod
+    def get_cache_dir() -> str:
+        return Helper.with_root_path(['runtime', 'nacos'])
