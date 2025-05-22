@@ -1,4 +1,5 @@
 from core.logger import Logger
+from core.middleware import middleware
 from routes import routes
 from fastapi import FastAPI
 from config.app_config import AppConfig
@@ -20,6 +21,7 @@ app = FastAPI(
 ExceptionHandler.register_exception_handler(app)
 app.openapi = openapi(app.openapi)
 routes.register(app)
+middleware.register(app)
 
 if __name__ == '__main__':
     Logger.get().info('项目启动中...')
