@@ -1,3 +1,5 @@
+import logging
+
 from loguru import logger as loguru_logger
 import sys
 import os
@@ -40,6 +42,7 @@ class Logger(metaclass=SingletonMeta):
             rotation='50 MB',
             retention='10 days',
             encoding='utf-8',
+            filter=lambda record: logging.INFO <= record['level'].no <= logging.WARNING,
             format=format_str,
             enqueue=True,
         )
@@ -49,6 +52,7 @@ class Logger(metaclass=SingletonMeta):
             rotation='50 MB',
             retention='10 days',
             encoding='utf-8',
+            filter=lambda record: logging.INFO <= record['level'].no <= logging.WARNING,
             format=format_str,
             enqueue=True,
         )
