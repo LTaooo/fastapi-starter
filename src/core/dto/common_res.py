@@ -9,3 +9,4 @@ class CommonRes(BaseModel, Generic[T]):
     code: int = StatusEnum.success.value
     data: Optional[Union[T, List[T]]]
     message: str = Field(default='success')
+    request_id: str = Field(default='')
