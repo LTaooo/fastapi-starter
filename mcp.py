@@ -29,7 +29,7 @@ mcp_services = [
 main_mcp = FastMCP(name='MainMCP')
 async def init():
     """
-    主mcp导入其它mcp
+    主mcp导入其它mcps
     """
     for mcp_service in mcp_services:
         await main_mcp.import_server(
