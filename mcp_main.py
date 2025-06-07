@@ -17,12 +17,12 @@ mcp_services = [
     MCPConfig(
         openapi_url='https://mr-agent-test.suntekcorps.com/common-tools-service/openapi.json',
         server_url='https://mr-agent-test.suntekcorps.com/common-tools-service',
-        name='common-tools-service',
+        name='common-tool',
     ),
     MCPConfig(
         openapi_url='https://mr-agent-test.suntekcorps.com/mr-tools-service/openapi.json',
         server_url='https://mr-agent-test.suntekcorps.com/mr-tools-service',
-        name='mr-tools-service',
+        name='mr-tool',
     ),
 ]
 

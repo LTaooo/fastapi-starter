@@ -18,6 +18,6 @@ router = APIRouter(prefix='/api/book', tags=['book'])
 
 class BookController:
     @staticmethod
-    @router.post('/get', summary='根据id获取书')
-    async def get(param: BookGetReq, operation_id=OperationEnum.get_book.value.id) -> CommonRes[BookGetRes]:
+    @router.post('/get', summary='根据id获取书', operation_id=OperationEnum.get_book.value.id)
+    async def get(param: BookGetReq) -> CommonRes[BookGetRes]:
         return Response.success('hello')
