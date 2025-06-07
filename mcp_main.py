@@ -44,4 +44,4 @@ async def init():
 
 if __name__ == '__main__':
     asyncio.run(init())
-    main_mcp.run(transport='streamable-http', port=8001)
+    main_mcp.run(transport='streamable-http', port=8001, host='0.0.0.0')
