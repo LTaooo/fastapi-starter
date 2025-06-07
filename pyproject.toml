@@ -9,6 +9,7 @@ dependencies = [
     "fastapi>=0.115.11",
     "gunicorn>=23.0.0",
     "loguru>=0.7.3",
+    "mcp==1.9.2",
     "nacos-sdk-python>=2.0.6",
     "pydantic-settings>=2.8.1",
     "python-dotenv>=1.0.1",

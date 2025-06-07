@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
+import contextlib
 from fastapi import FastAPI
 from config.nacos_config import NacosConfig
 from core.config import Config
+from core.mcp import mcp
 from core.mysql.database.book.book_database import BookDatabase
 from core.nacos.nacos import Nacos
 from core.redis.redis import Redis
@@ -10,8 +12,12 @@ from core.redis.redis import Redis
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await _before_startup()
-    yield
-    await _after_startup()
+    async with contextlib.AsyncExitStack() as stack:
+        await stack.enter_async_context(mcp.mcp.session_manager.run())
+        try:
+            yield
+        finally:
+            await _after_startup()
 
 
 async def _before_startup():

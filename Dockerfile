@@ -12,4 +12,4 @@ RUN uv pip install . --system -i https://pypi.tuna.tsinghua.edu.cn/simple
 EXPOSE 8000
 
 # 启动应用
-CMD ["python", "src/main.py"]
+CMD ["python", "main.py"]
