@@ -1,12 +1,9 @@
 from fastapi import FastAPI
-from fastmcp import FastMCP
-
 from config.app_config import AppConfig
 from core.config import Config
 from core.exception.handle.exception_handle import ExceptionHandler
 from core.lifespan import lifespan
-
-# from core.mcp import mcp
+from core.mcp import mcp
 from core.middleware import middleware
 from core.openapi import openapi
 
@@ -30,14 +27,7 @@ ExceptionHandler.register_exception_handler(app)
 app.openapi = openapi(app.openapi)
 middleware.register(app)  # 将中间件注册移到路由之前
 routes.register(app)
-# mcp.register(app)
-
-mcp = FastMCP.from_fastapi(
-    app=app,
-    name='McpApp',
-    timeout=5.0,
-)
-mcp.run(transport='streamable-http', host='0.0.0.0', port=8000)
+mcp.register(app)
 
 
 if __name__ == '__main__':
