@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . /app
 
 RUN uv pip install . --system -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install apache-skywalking
 
 EXPOSE 8000
 
