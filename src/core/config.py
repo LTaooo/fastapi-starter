@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from typing import Type, TypeVar, Generic
+from typing import Type, TypeVar, ClassVar
 from pydantic import BaseModel
 
 from config.base.base_nacos_config import BaseNacosConfig
@@ -8,9 +8,9 @@ load_dotenv()
 _T = TypeVar('_T', bound=BaseModel)
 
 
-class Config(Generic[_T]):
-    __origin_config: dict = {}
-    _configs: dict[str, _T] = {}
+class Config:
+    __origin_config: ClassVar[dict] = {}
+    _configs: ClassVar[dict] = {}
 
     @classmethod
     def get(cls, config_class: Type[_T]) -> _T:
