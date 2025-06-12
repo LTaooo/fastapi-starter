@@ -3,14 +3,18 @@
     "venvPath": ".",
     "typeCheckingMode": "basic",
     "include": [
-        "app",
-        "config",
-        "core",
-        "tests",
-        "util"
+        "**/*.py"
     ],
     "exclude": [
-        "**/__pycache__"
+        "**/__pycache__",
+        "logs",
+        ".venv",
+        "dist",
+        "build",
+        "**/*.egg-info",
+        ".vscode",
+        ".git",
+        ".idea"
     ],
     "ignore": [
     ],

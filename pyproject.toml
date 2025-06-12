@@ -33,6 +33,9 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 
+[tool.uv]
+package = false
+
 [[tool.uv.index]]
-name = "tsinghua"
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
