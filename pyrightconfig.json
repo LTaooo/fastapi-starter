@@ -14,7 +14,8 @@
         "**/*.egg-info",
         ".vscode",
         ".git",
-        ".idea"
+        ".idea",
+        "__init__.py"
     ],
     "ignore": [
     ],
