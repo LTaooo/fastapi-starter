@@ -20,14 +20,18 @@ class FastMCP(FastMCPBase):
         server.
 
         """
-        # /mcp/mr_tool
         param = request_params.get()
         server: str = ''
         if param:
             param = json.loads(param)
             server = param.get('server', '')
+
+        # 将server参数按逗号分隔成多个值
+        server_prefixes = [prefix.strip() for prefix in server.split(',')] if server else ['']
+
         tools = await self.get_tools()
-        return [tool.to_mcp_tool(name=key) for key, tool in tools.items() if key.startswith(server)]
+        # 检查工具名称是否以任一server前缀开头
+        return [tool.to_mcp_tool(name=key) for key, tool in tools.items() if any(key.startswith(prefix) for prefix in server_prefixes)]
 
 
 class MCPConfig(BaseModel):
