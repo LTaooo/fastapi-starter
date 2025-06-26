@@ -4,6 +4,7 @@ from config.nacos_config import NacosConfig
 from core.config import Config
 from core.mysql.database.book.book_database import BookDatabase
 from core.nacos.nacos import Nacos
+from core.rabbitmq.rabbitmq import RabbitMQ
 from core.redis.redis import Redis
 
 
@@ -22,9 +23,11 @@ async def _before_startup():
     Config().update_config(await Nacos().get_config(nacos_config.get_config_data()))
     BookDatabase.init()
     Redis().get_instance()
+    await RabbitMQ().connect()
 
 
 async def _after_startup():
     await BookDatabase.close()
     await Redis().disconnect()
     await Nacos().close()
+    await RabbitMQ().close()

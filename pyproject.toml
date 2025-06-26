@@ -5,6 +5,7 @@ description = "fastapi 脚手架"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aio-pika>=9.5.5",
     "aiomysql>=0.2.0",
     "fastapi>=0.115.11",
     "gunicorn>=23.0.0",
