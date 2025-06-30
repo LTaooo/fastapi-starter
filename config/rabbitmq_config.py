@@ -2,6 +2,7 @@ from typing import Type
 
 from pydantic import Field
 
+from app.queues.demo_queue import DemoConsumer
 from config.base.base_nacos_config import BaseNacosConfig
 from core.config import Config
 from config.app_config import AppConfig
@@ -24,4 +25,4 @@ class RabbitMQConfig(BaseNacosConfig):
 
     @staticmethod
     def get_consumers() -> list[Type[BaseConsumer]]:
-        return []
+        return [DemoConsumer]

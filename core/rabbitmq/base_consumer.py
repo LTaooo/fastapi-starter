@@ -8,9 +8,9 @@ from core.config import Config
 
 
 class Result(int, Enum):
-    OK = 1
-    REJECT = 2
-    RETRY = 3
+    OK = 1  # 成功
+    REJECT = 2  # 拒绝
+    REQUEUE = 3  # 重新入队
 
 
 # noinspection PyMethodMayBeStatic

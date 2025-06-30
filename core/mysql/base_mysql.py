@@ -34,7 +34,7 @@ class BaseMysql(ABC, metaclass=SingletonABCMeta):
     @classmethod
     @asynccontextmanager
     async def _session(cls) -> AsyncGenerator[AsyncSession, None]:
-        session = AsyncSession(cls._engine)
+        session = AsyncSession(cls._engine, expire_on_commit=False)
         try:
             yield session
         finally:
@@ -43,7 +43,7 @@ class BaseMysql(ABC, metaclass=SingletonABCMeta):
     @classmethod
     @asynccontextmanager
     async def _auto_commit_session(cls) -> AsyncGenerator[AsyncSession, None]:
-        session = AsyncSession(cls._engine)
+        session = AsyncSession(cls._engine, expire_on_commit=False)
         try:
             yield session
             await session.commit()

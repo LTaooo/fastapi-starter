@@ -40,7 +40,7 @@ class RabbitMQ(metaclass=SingletonMeta):
         self.connection_pool: Pool = Pool(self._get_connection, max_size=self.config.connection_pool)
         channel = await self.get_channel()
         await channel.declare_exchange(self.config.exchange, aio_pika.ExchangeType.DIRECT)
-        Logger.get().info('RabbitMQ: 链接成功')
+        Logger.get().info('RabbitMQ: 连接成功')
         for consumer_class in self.config.get_consumers():
             asyncio.create_task(self.consume(consumer_class))
 
@@ -69,7 +69,7 @@ class RabbitMQ(metaclass=SingletonMeta):
                     await message.ack()
                 elif result == Result.REJECT:
                     await message.reject(requeue=False)
-                elif result == Result.RETRY:
+                elif result == Result.REQUEUE:
                     await message.reject(requeue=True)
 
     async def publish(self, message: str, routing_key: str) -> None:
