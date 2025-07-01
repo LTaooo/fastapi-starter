@@ -1,12 +1,10 @@
 from fastapi import APIRouter
 
-from app.dto.request.book_create_req import BookCreateReq
+from app.dto.request.book_req import BookGetReq, BookListReq, BookCreateReq
 from core.di.container import Container
 from core.dto.common_res import CommonRes
 from core.dto.page_res import PageRes
-from app.dto.request.book_get_req import BookGetReq
-from app.dto.request.book_list_req import BookListReq
-from app.dto.response.book_get_res import BookGetRes
+from app.dto.response.book_res import BookGetRes
 from app.service.book_service import BookService
 from core.mysql.database.app.app_database import AppDatabase
 from core.mysql.database.app.app_session import AppSession

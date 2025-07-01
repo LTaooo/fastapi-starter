@@ -1,8 +1,6 @@
-from app.dto.request.book_list_req import BookListReq
-from app.dto.request.book_create_req import BookCreateReq
+from app.dto.request.book_req import BookListReq, BookCreateReq
 from app.model.book import Book
-from app.repository.book_repository import BookRepository
-from app.repository.params.book_filter import BookFilter
+from app.repository.book_repository import BookRepository, BookFilter
 from core.mysql.database.app.app_session import AppSession
 from core.mysql.page_resource import PageResource
 
@@ -28,4 +26,4 @@ class BookService:
         return result
 
     def _list_req_to_filter(self, req: BookListReq) -> BookFilter:
-        return BookFilter(**req.model_dump())
+        return self.bookRepository.filter_class()(**req.model_dump())

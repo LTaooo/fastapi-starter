@@ -1,16 +1,37 @@
-from abc import ABC
-from typing import Generic
+from abc import ABC, abstractmethod
+from typing import Generic, Type
+
+from pydantic import BaseModel
 from sqlalchemy import Select, func
 from sqlmodel import select
 
 from core.mysql.base_mysql_session import BaseMysqlSession
 from core.mysql.page_resource import PageResource
-from core.types.types import SQL_MODEL_TYPE
+from core.types.types import SQL_MODEL_TYPE, FILTER_TYPE
 
 
-class BaseRepository(Generic[SQL_MODEL_TYPE], ABC):
-    @classmethod
-    async def _for_page(cls, session: BaseMysqlSession, page: int, limit: int, sql: Select) -> PageResource[SQL_MODEL_TYPE]:
+class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
+    @abstractmethod
+    def _model_class(self) -> Type[SQL_MODEL_TYPE]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def filter_class(self) -> Type[FILTER_TYPE]:
+        raise NotImplementedError
+
+    async def find(self, session: BaseMysqlSession, pk: int) -> SQL_MODEL_TYPE | None:
+        return await session.get_session().get(self._model_class(), pk)
+
+    async def list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> list[SQL_MODEL_TYPE]:
+        sql = self._filter(param)
+        result = await session.get_session().execute(sql)
+        return [self._model_class().model_validate(row) for row in result]
+
+    async def page_list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> PageResource[SQL_MODEL_TYPE]:
+        sql = self._filter(param)
+        return await self._for_page(session, param.page or 1, param.limit or 20, sql)
+
+    async def _for_page(self, session: BaseMysqlSession, page: int, limit: int, sql: Select) -> PageResource[SQL_MODEL_TYPE]:
         page_resource: PageResource[SQL_MODEL_TYPE] = PageResource(total=0, data=[], limit=limit, page=page)
         total = await session.get_session().exec(select(func.count()).select_from(sql.subquery()))
         sql = sql.offset(page).limit(limit)
@@ -18,3 +39,12 @@ class BaseRepository(Generic[SQL_MODEL_TYPE], ABC):
         page_resource.total = total.one()
         page_resource.data = list(result.all())
         return page_resource
+
+    @abstractmethod
+    def _filter(self, param: BaseModel) -> Select[tuple[SQL_MODEL_TYPE]]:
+        """
+        通用筛选
+        :param param:
+        :return:
+        """
+        raise NotImplementedError
