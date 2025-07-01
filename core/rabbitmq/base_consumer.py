@@ -3,9 +3,6 @@ from enum import Enum
 
 from aio_pika.abc import AbstractIncomingMessage
 
-from config.app_config import AppConfig
-from core.config import Config
-
 
 class Result(int, Enum):
     OK = 1  # 成功
@@ -15,8 +12,13 @@ class Result(int, Enum):
 
 # noinspection PyMethodMayBeStatic
 class BaseConsumer(ABC):
+    message: AbstractIncomingMessage
+
+    def __init__(self, message: AbstractIncomingMessage) -> None:
+        self.message = message
+
     @abstractmethod
-    async def consume(self, message: AbstractIncomingMessage) -> Result:
+    async def consume(self) -> Result:
         raise NotImplementedError
 
     @classmethod
@@ -26,8 +28,12 @@ class BaseConsumer(ABC):
 
     @classmethod
     def get_routing_key(cls) -> str:
-        return Config.get(AppConfig).app_name + '_task_routing_key'
+        raise NotImplementedError
 
     @classmethod
     def get_qos(cls) -> int:
         return 10
+
+    @classmethod
+    def get_retry_count(cls) -> int:
+        return 3

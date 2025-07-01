@@ -10,7 +10,8 @@ from core.rabbitmq.base_consumer import BaseConsumer
 
 
 def _generate_exchange():
-    return f'exchange_{Config().get(AppConfig).app_name}'
+    config = Config().get(AppConfig)
+    return f'exchange_{config.app_name}_{config.app_env.value}'
 
 
 class RabbitMQConfig(BaseNacosConfig):
@@ -25,4 +26,7 @@ class RabbitMQConfig(BaseNacosConfig):
 
     @staticmethod
     def get_consumers() -> list[Type[BaseConsumer]]:
-        return [DemoConsumer]
+        consumers: list[Type[BaseConsumer]] = []
+        if Config().get(AppConfig).is_dev():
+            consumers.append(DemoConsumer)
+        return consumers

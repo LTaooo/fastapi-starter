@@ -40,7 +40,6 @@ class RabbitMQ(metaclass=SingletonMeta):
         self.connection_pool: Pool = Pool(self._get_connection, max_size=self.config.connection_pool)
         channel = await self.get_channel()
         await channel.declare_exchange(self.config.exchange, aio_pika.ExchangeType.DIRECT)
-        Logger.get().info('RabbitMQ: 连接成功')
         for consumer_class in self.config.get_consumers():
             asyncio.create_task(self.consume(consumer_class))
 
@@ -50,27 +49,33 @@ class RabbitMQ(metaclass=SingletonMeta):
 
     async def consume(self, consumer_class: Type[BaseConsumer]) -> None:
         channel = await self.get_channel()
-        consumer = consumer_class()
 
-        await channel.set_qos(consumer.get_qos())
+        await channel.set_qos(consumer_class.get_qos())
         queue = await channel.declare_queue(
-            consumer.get_queue_name(),
-            durable=False,
+            consumer_class.get_queue_name(),
+            durable=True,  # 队列持久化
             auto_delete=False,
         )
         # 绑定队列到交换机
         exchange = await channel.get_exchange(self.config.exchange)
-        await queue.bind(exchange, consumer.get_routing_key())
+        await queue.bind(exchange, consumer_class.get_routing_key())
         Logger.get().info(f'消费队列: {consumer_class.get_queue_name()} 监听成功')
-        async with queue.iterator() as queue_iter:
-            async for message in queue_iter:
-                result = await consumer.consume(message)
+
+        async def process_message(message: aio_pika.abc.AbstractIncomingMessage) -> None:
+            consumer_instance = consumer_class(message)
+            try:
+                result = await consumer_instance.consume()
                 if result == Result.OK:
                     await message.ack()
                 elif result == Result.REJECT:
                     await message.reject(requeue=False)
                 elif result == Result.REQUEUE:
                     await message.reject(requeue=True)
+            except Exception as e:
+                Logger.get().error(f'消费队列: {consumer_class.get_queue_name()} 消费失败: {e}')
+                await message.reject(requeue=False)
+
+        await queue.consume(process_message, no_ack=False)
 
     async def publish(self, message: str, routing_key: str) -> None:
         channel = await self.get_channel()
