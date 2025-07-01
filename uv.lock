@@ -487,6 +487,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "aio-pika" },
     { name = "aiomysql" },
+    { name = "apscheduler" },
     { name = "fastapi" },
     { name = "gunicorn" },
     { name = "loguru" },
@@ -512,6 +513,7 @@ dev = [
 requires-dist = [
     { name = "aio-pika", specifier = ">=9.5.5" },
     { name = "aiomysql", specifier = ">=0.2.0" },
+    { name = "apscheduler", specifier = ">=3.11.0" },
     { name = "fastapi", specifier = ">=0.115.11" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "loguru", specifier = ">=0.7.3" },
