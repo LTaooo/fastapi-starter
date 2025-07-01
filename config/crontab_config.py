@@ -9,7 +9,7 @@ from core.logger import Logger
 
 # noinspection PyMethodMayBeStatic
 class CrontabConfig(BaseNacosConfig):
-    enable: bool = Field(description='是否开启', alias='crontab.enable', default=True)
+    enable: bool = Field(description='是否开启', alias='crontab.enable', default=False)
     singleton: bool = Field(description='多实例时, 只在其中一个实例运行定时任务', alias='crontab.singleton', default=True)
 
     def get_singleton_key(self):
