@@ -15,10 +15,10 @@ class BookService:
         return await self.bookRepository.find(session, ident)
 
     async def list(self, session: AppSession, req: BookListReq) -> list[Book]:
-        return await self.bookRepository.list(session, self.list_req_to_filter(req))
+        return await self.bookRepository.list(session, self._list_req_to_filter(req))
 
     async def page_list(self, session: AppSession, req: BookListReq) -> PageResource[Book]:
-        param = self.list_req_to_filter(req)
+        param = self._list_req_to_filter(req)
         param.page = param.page if param.page else 1
         param.limit = param.limit if param.limit else 20
         return await self.bookRepository.page_list(session, param)
@@ -27,5 +27,5 @@ class BookService:
         result = await self.bookRepository.create(session, req)
         return result
 
-    def list_req_to_filter(self, req: BookListReq) -> BookFilter:
+    def _list_req_to_filter(self, req: BookListReq) -> BookFilter:
         return BookFilter(**req.model_dump())
