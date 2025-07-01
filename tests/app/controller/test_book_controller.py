@@ -5,6 +5,7 @@ from core.status_enum import StatusEnum
 
 async def test_get(client: AsyncClient):
     response = await client.post('/api/book/get', json={'id': 1})
+    print(response.json())
     assert response.status_code == 200
     assert response.json()['code'] == StatusEnum.success.value
     assert response.json()['data'] is not None

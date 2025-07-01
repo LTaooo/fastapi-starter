@@ -8,7 +8,7 @@ from core.config import Config
 from core.crontab import crontab
 from core.logger import Logger
 from core.mcp import mcp
-from core.mysql.database.book.book_database import BookDatabase
+from core.mysql.database.app.app_database import AppDatabase
 from core.nacos.nacos import Nacos
 from core.rabbitmq.rabbitmq import RabbitMQ
 from core.redis.redis import Redis
@@ -34,7 +34,7 @@ async def _before_startup():
     nacos_config = Config.get(NacosConfig)
     await Nacos().init(nacos_config)
     Config().update_config(await Nacos().get_config(nacos_config.get_config_data()))
-    BookDatabase.init()
+    AppDatabase.init()
     Redis().get_instance()
     await RabbitMQ().connect()
     await crontab.register()
@@ -42,7 +42,7 @@ async def _before_startup():
 
 async def _before_shutdown():
     await crontab.shutdown()
-    await BookDatabase.close()
+    await AppDatabase.close()
     await Redis().disconnect()
     await Nacos().close()
     await RabbitMQ().close()
