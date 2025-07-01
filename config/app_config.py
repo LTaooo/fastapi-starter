@@ -23,3 +23,10 @@ class AppConfig(BaseSettings):
 
     def is_dev(self) -> bool:
         return self.app_env == AppEnvEnum.DEV
+
+    def is_prod_or_test(self) -> bool:
+        return self.app_env == AppEnvEnum.PROD or self.app_env == AppEnvEnum.TEST
+
+    # noinspection HttpUrlsUsage
+    def get_bind_host(self) -> str:
+        return f'http://{self.host}:{self.port}'
