@@ -27,9 +27,7 @@ class BookRepository(BaseRepository[Book, BookFilter]):
 
     async def create(self, session: AppSession, req: BookCreateReq) -> Book:
         book = Book(name=req.name, created_at=DateTime.now(), updated_at=DateTime.now())
-        session.get_session().add(book)
-        await session.get_session().flush()
-        return book
+        return await self.save(session, book, False)
 
     def _filter(self, param: BookFilter) -> Select[tuple[Book]]:
         """
@@ -39,9 +37,9 @@ class BookRepository(BaseRepository[Book, BookFilter]):
         """
         sql = select(Book)
         if param.ids is not None:
-            sql = sql.where(col(Book.id).in_(param.ids))
+            sql = sql.where(col('id').in_(param.ids))
         if param.name is not None:
-            sql = sql.where(col(Book.name).like(f'%{param.name}%'))
+            sql = sql.where(col('name').like(f'%{param.name}%'))
         if param.limit is not None:
             sql = sql.limit(param.limit)
         if param.page is not None:
