@@ -1,21 +1,12 @@
 from typing import Type
 
-from pydantic import Field
 from sqlalchemy import Select
 from sqlmodel import col, select
 
-from app.dto.request.book_req import BookCreateReq
-from core.mysql.base_filter import BaseFilter
+from app.repository.params.book_repository_param import BookFilter, BookCreate
 from core.mysql.base_repository import BaseRepository
 from app.model.book import Book
 from core.mysql.database.app.app_session import AppSession
-
-from core.util.datetime import DateTime
-
-
-class BookFilter(BaseFilter):
-    ids: list[int] | None = Field(default=None, description='书籍id')
-    name: str | None = Field(default=None, description='书名')
 
 
 class BookRepository(BaseRepository[Book, BookFilter]):
@@ -25,8 +16,8 @@ class BookRepository(BaseRepository[Book, BookFilter]):
     def filter_class(self) -> Type[BookFilter]:
         return BookFilter
 
-    async def create(self, session: AppSession, req: BookCreateReq) -> Book:
-        book = Book(name=req.name, created_at=DateTime.now(), updated_at=DateTime.now())
+    async def create(self, session: AppSession, param: BookCreate) -> Book:
+        book = Book(**param.model_dump(exclude_none=True))
         return await self.save(session, book, False)
 
     def _filter(self, param: BookFilter) -> Select[tuple[Book]]:

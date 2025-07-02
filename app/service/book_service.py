@@ -1,6 +1,7 @@
 from app.dto.request.book_req import BookListReq, BookCreateReq
 from app.model.book import Book
 from app.repository.book_repository import BookRepository, BookFilter
+from app.repository.params.book_repository_param import BookCreate
 from core.mysql.database.app.app_session import AppSession
 from core.mysql.page_resource import PageResource
 
@@ -22,7 +23,7 @@ class BookService:
         return await self.bookRepository.page_list(session, param)
 
     async def create(self, session: AppSession, req: BookCreateReq) -> Book:
-        result = await self.bookRepository.create(session, req)
+        result = await self.bookRepository.create(session, BookCreate(**req.model_dump()))
         return result
 
     def _list_req_to_filter(self, req: BookListReq) -> BookFilter:

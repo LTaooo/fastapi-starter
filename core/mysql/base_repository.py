@@ -47,6 +47,15 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         page_resource.data = list(result.all())
         return page_resource
 
+    async def delete_by_id(self, session: BaseMysqlSession, pk: int) -> None:
+        model = await self.find(session, pk)
+        if not model:
+            raise ValueError(f'Model with id {pk} not found')
+        await session.get_session().delete(model)
+
+    async def delete(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE) -> None:
+        await session.get_session().delete(model)
+
     @abstractmethod
     def _filter(self, param: BaseModel) -> Select[tuple[SQL_MODEL_TYPE]]:
         """
