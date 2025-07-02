@@ -32,5 +32,4 @@ async def list_book(param: BookListReq, session: AppSession = Depends(AppDatabas
 @router.post('/create', summary='创建书籍')
 async def create_book(param: BookCreateReq, session: AppSession = Depends(AppDatabase.get_session)) -> CommonRes[BookGetRes]:
     model = await _book_service.create(session, param)
-    await session.get_session().commit()
     return Response.success(BookGetRes.from_model(model))

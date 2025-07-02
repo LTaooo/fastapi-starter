@@ -24,8 +24,7 @@ async def test_list(client: AsyncClient):
 
 async def test_book_repository_create(app_session: AppSession):
     repository = BookRepository()
-    async with app_session.get_session().begin():
+    async with app_session.transaction():
         book1 = await repository.create(app_session, BookCreate(name='test'))
         book2 = await repository.create(app_session, BookCreate(name='test'))
-        await app_session.get_session().commit()
         assert book2.id - book1.id == 1

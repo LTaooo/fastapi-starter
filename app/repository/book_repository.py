@@ -18,7 +18,7 @@ class BookRepository(BaseRepository[Book, BookFilter]):
 
     async def create(self, session: AppSession, param: BookCreate) -> Book:
         book = Book(**param.model_dump(exclude_none=True))
-        return await self.save(session, book, False)
+        return await self.save(session, book, True)
 
     def _filter(self, param: BookFilter) -> Select[tuple[Book]]:
         """
