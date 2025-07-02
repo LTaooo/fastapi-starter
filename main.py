@@ -1,16 +1,18 @@
+from core import logger
 from core.dto.common_res import CommonRes
+from core.exception.handle import exception_handle
 from core.logger import Logger
 from core.middleware import middleware
 from routes import routes
 from fastapi import FastAPI
 from config.app_config import AppConfig
 from core.config import Config
-from core.exception.handle.exception_handle import ExceptionHandler
 from core.lifespan import lifespan
 from core.openapi import openapi
 import uvicorn
 
 app_config = Config.get(AppConfig)
+logger.init()
 app = FastAPI(
     lifespan=lifespan,
     title=app_config.app_name,
@@ -20,7 +22,7 @@ app = FastAPI(
     openapi_url='/openapi.json' if not app_config.is_prod() else None,
     root_path=app_config.app_root_path,
 )
-ExceptionHandler.register_exception_handler(app)
+exception_handle.register(app)
 app.openapi = openapi(app.openapi)
 routes.register(app)
 middleware.register(app)

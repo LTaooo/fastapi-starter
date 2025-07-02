@@ -52,7 +52,7 @@ class Logger(metaclass=SingletonMeta):
             rotation='50 MB',
             retention='10 days',
             encoding='utf-8',
-            filter=lambda record: logging.INFO <= record['level'].no <= logging.WARNING,
+            filter=lambda record: record['level'].no >= logging.ERROR,
             format=format_str,
             enqueue=True,
         )
@@ -60,7 +60,8 @@ class Logger(metaclass=SingletonMeta):
     @classmethod
     def _get_log_file(cls, level: str):
         level = level.lower()
-        log_file = Helper.with_root_path(['logs', cls.service_name, f'{cls.service_name}-{level}.log'])
+        paths = ['logs', cls.service_name, level, f'{cls.service_name}-{level}.log']
+        log_file = str(Helper.with_root_path(paths))
         os.makedirs(os.path.dirname(log_file), exist_ok=True, mode=0o644)
         return log_file
 
@@ -68,3 +69,26 @@ class Logger(metaclass=SingletonMeta):
     def get(cls):
         cls.init()
         return cls.__logger
+
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            level = Logger.get().level(record.levelname).name
+        except (ValueError, AttributeError):
+            level = record.levelno
+
+        frame = logging.currentframe()
+        depth = 2
+        while frame and frame.f_globals.get('__name__') == 'logging':
+            frame = frame.f_back
+            depth += 1
+
+        Logger.get().opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+
+logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO)
+
+
+def init():
+    Logger.init()

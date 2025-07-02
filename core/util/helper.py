@@ -1,4 +1,6 @@
+import json
 import os
+import traceback
 
 
 class Helper:
@@ -22,3 +24,16 @@ class Helper:
         拼接项目根目录
         """
         return str(os.path.join(Helper.get_root_path(), *paths))
+
+    @staticmethod
+    def exception_str(e: Exception, replace: bool) -> str:
+        filtered = [
+            line
+            for line in traceback.format_tb(e.__traceback__)
+            if 'site-packages/starlette' not in line and 'site-packages/fastapi' not in line
+        ]
+        tb_str = ''.join(filtered)
+        tb_str += f'\n {str(e)}'
+        if replace:
+            return json.dumps({'error': tb_str}, ensure_ascii=False)
+        return tb_str
