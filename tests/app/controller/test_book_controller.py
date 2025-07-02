@@ -2,7 +2,6 @@ from httpx import AsyncClient
 
 from app.repository.book_repository import BookRepository
 from app.repository.params.book_repository_param import BookCreate
-from core.mysql.database.app.app_database import AppDatabase
 from core.mysql.database.app.app_session import AppSession
 from core.status_enum import StatusEnum
 
@@ -23,12 +22,10 @@ async def test_list(client: AsyncClient):
     assert response.json()['data']['total'] >= len(response.json()['data']['data'])
 
 
-async def test_book_repository_create(client: AsyncClient):
+async def test_book_repository_create(app_session: AppSession):
     repository = BookRepository()
-    session: AppSession
-    async with AppDatabase.with_session() as session:
-        async with session.get_session().begin():
-            book1 = await repository.create(session, BookCreate(name='test'))
-            book2 = await repository.create(session, BookCreate(name='test'))
-            await session.get_session().commit()
-            assert book2.id - book1.id == 1
+    async with app_session.get_session().begin():
+        book1 = await repository.create(app_session, BookCreate(name='test'))
+        book2 = await repository.create(app_session, BookCreate(name='test'))
+        await app_session.get_session().commit()
+        assert book2.id - book1.id == 1
