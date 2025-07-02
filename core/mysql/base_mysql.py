@@ -50,9 +50,6 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
     @classmethod
     @asynccontextmanager
     async def with_session(cls) -> AsyncGenerator[_SESSION, None]:
-        """
-        获取一个异步MySQL会话, 不会自动commit和rollback, 如果涉及写操作, 需要手动commit
-        """
         async with cls._session() as session:
             yield cls.session_class()(session)
 
