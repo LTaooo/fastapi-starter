@@ -1,5 +1,5 @@
 [project]
-name = "fast-api-template"
+name = "fastapi-starter"
 version = "0.1.0"
 description = "fastapi 脚手架"
 readme = "README.md"

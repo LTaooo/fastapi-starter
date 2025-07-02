@@ -17,6 +17,7 @@ class AppConfig(BaseSettings):
     workers: int = Field(description='工作进程数', default=8, ge=1)
     host: str = Field(description='主机地址', default='0.0.0.0')
     port: int = Field(description='端口号', default=8000)
+    app_root_path: str = Field(description='根路径', default='')
 
     def is_prod(self) -> bool:
         return self.app_env == AppEnvEnum.PROD

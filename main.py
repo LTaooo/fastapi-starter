@@ -1,3 +1,4 @@
+from core.dto.common_res import CommonRes
 from core.logger import Logger
 from core.middleware import middleware
 from routes import routes
@@ -14,9 +15,10 @@ app = FastAPI(
     lifespan=lifespan,
     title=app_config.app_name,
     debug=app_config.app_debug,
-    responses={200: {'description': '成功'}},
+    responses={200: CommonRes(data=None).model_dump()},
     docs_url='/docs' if not app_config.is_prod() else None,
     openapi_url='/openapi.json' if not app_config.is_prod() else None,
+    root_path=app_config.app_root_path,
 )
 ExceptionHandler.register_exception_handler(app)
 app.openapi = openapi(app.openapi)
