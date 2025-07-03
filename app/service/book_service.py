@@ -1,4 +1,6 @@
-from app.dto.request.book_req import BookListReq, BookCreateReq
+from typing import List
+
+from app.dto.request.book_req import BookListReq, BookCreateReq, BookBulkUpdateNameReq
 from app.model.book import Book
 from app.repository.book_repository import BookRepository, BookFilter
 from app.repository.params.book_repository_param import BookCreate
@@ -24,7 +26,14 @@ class BookService:
 
     async def create(self, session: AppSession, req: BookCreateReq) -> Book:
         result = await self.bookRepository.create(session, BookCreate(**req.model_dump()))
+        await session.commit()
         return result
 
     def _list_req_to_filter(self, req: BookListReq) -> BookFilter:
         return self.bookRepository.filter_class()(**req.model_dump())
+
+    async def bulk_update_name(self, session: AppSession, req: List[BookBulkUpdateNameReq]) -> None:
+        async with session.transaction():
+            for item in req:
+                book = await self.bookRepository.find_or_raise(session, item.id)
+                book.name = item.name

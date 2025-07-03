@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import Select, func
 from sqlmodel import select
 
+from core.exception.runtime_exception import RuntimeException
 from core.mysql.base_mysql_session import BaseMysqlSession
 from core.mysql.page_resource import PageResource
 from core.types.types import SQL_MODEL_TYPE, FILTER_TYPE
@@ -22,20 +23,26 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
     async def find(self, session: BaseMysqlSession, pk: int) -> SQL_MODEL_TYPE | None:
         return await session.get_session().get(self._model_class(), pk)
 
+    async def find_or_raise(self, session: BaseMysqlSession, pk: int, message: str | None = None) -> SQL_MODEL_TYPE:
+        if not message:
+            message = f'{pk} not found'
+        model = await self.find(session, pk)
+        if not model:
+            raise RuntimeException(message)
+        return model
+
     async def list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> list[SQL_MODEL_TYPE]:
         sql = self._filter(param)
-        result = await session.get_session().execute(sql)
+        result = await session.get_session().exec(sql)  # type: ignore
         return [self._model_class().model_validate(row) for row in result]
 
     async def page_list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> PageResource[SQL_MODEL_TYPE]:
         sql = self._filter(param)
         return await self._for_page(session, param.page or 1, param.limit or 20, sql)
 
-    async def save(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE, commit: bool) -> SQL_MODEL_TYPE:
+    async def save(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE) -> SQL_MODEL_TYPE:
         session.get_session().add(model)
         await session.get_session().flush()
-        if commit:
-            await session.get_session().commit()
         return model
 
     async def _for_page(self, session: BaseMysqlSession, page: int, limit: int, sql: Select) -> PageResource[SQL_MODEL_TYPE]:
