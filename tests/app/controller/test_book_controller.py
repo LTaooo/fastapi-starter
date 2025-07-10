@@ -26,10 +26,24 @@ async def test_list_book(client: AsyncClient):
 
 async def test_book_repository_create(app_session: AppSession):
     repository = BookRepository()
+    book = await repository.find(session=app_session, pk=1)
+    assert book is not None
+    await app_session.commit()
+
     async with app_session.transaction():
+        book.name = 'test' + DateTime.datetime()
         book1 = await repository.create(app_session, BookCreate(name='test'))
         book2 = await repository.create(app_session, BookCreate(name='test'))
         assert book2.id - book1.id == 1
+
+    async with app_session.transaction():
+        book.name = 'test1' + DateTime.datetime()
+
+    book.name = 'test2' + DateTime.datetime()
+    await app_session.commit()
+
+    book.name = 'test3' + DateTime.datetime()
+    await app_session.commit()
 
 
 async def test_bulk_update_name(client: AsyncClient):
