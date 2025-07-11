@@ -22,6 +22,6 @@ class Redis(metaclass=SingletonMeta):
 
     async def disconnect(self):
         if self.redis:
-            await self.redis.close()
+            await self.redis.aclose()
         if self.pool:
             await self.pool.disconnect()
