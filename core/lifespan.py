@@ -7,7 +7,7 @@ from config.nacos_config import NacosConfig
 from core.config import Config
 from core.crontab import crontab
 from core.logger import Logger
-from core.mcp import mcp
+from core.mcp_server import mcp
 from core.mysql.database.app.app_database import AppDatabase
 from core.nacos.nacos import Nacos
 from core.rabbitmq.rabbitmq import RabbitMQ

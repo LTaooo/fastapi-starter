@@ -6,7 +6,7 @@ from config.app_config import AppConfig
 from config.mcp_config import MCPConfig
 from core.config import Config
 from core.logger import Logger
-from core.mcp.operation_enums import OperationEnum
+from core.mcp_server.operation_enums import OperationEnum
 
 __register_tools = []
 
@@ -23,4 +23,4 @@ def register(app: FastAPI):
             if route.operation_id not in __register_tools:
                 mcp.add_tool(route.endpoint, route.operation_id, route.description)
                 __register_tools.append(route.operation_id)
-    Logger.get().info(f'已注册mcp工具: {len(__register_tools)}')
+    Logger.get().info(f'已注册mcp工具: {__register_tools}')
