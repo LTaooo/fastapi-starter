@@ -34,7 +34,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
     async def list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> list[SQL_MODEL_TYPE]:
         sql = self._filter(param)
         result = await session.get_session().exec(sql)  # type: ignore
-        return [self._model_class().model_validate(row) for row in result]
+        return list(result.all())
 
     async def page_list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> PageResource[SQL_MODEL_TYPE]:
         sql = self._filter(param)
