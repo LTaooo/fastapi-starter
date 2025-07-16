@@ -17,7 +17,7 @@ class Redis(metaclass=SingletonMeta):
         )
         self.redis = AsyncIORedis(connection_pool=self.pool)
 
-    def get_instance(self):
+    def get_instance(self) -> AsyncIORedis:
         return self.redis
 
     async def disconnect(self):
