@@ -31,6 +31,11 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
             raise RuntimeException(message)
         return model
 
+    async def get_one(self, session: BaseMysqlSession, param: FILTER_TYPE) -> SQL_MODEL_TYPE | None:
+        sql = self._filter(param)
+        result = await session.get_session().exec(sql)  # type: ignore
+        return result.first()
+
     async def list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> list[SQL_MODEL_TYPE]:
         sql = self._filter(param)
         result = await session.get_session().exec(sql)  # type: ignore
@@ -48,7 +53,8 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
     async def _for_page(self, session: BaseMysqlSession, page: int, limit: int, sql: Select) -> PageResource[SQL_MODEL_TYPE]:
         page_resource: PageResource[SQL_MODEL_TYPE] = PageResource(total=0, data=[], limit=limit, page=page)
         total = await session.get_session().exec(select(func.count()).select_from(sql.subquery()))
-        sql = sql.offset(page).limit(limit)
+        offset = (page - 1) * limit
+        sql = sql.offset(offset).limit(limit)
         result = await session.get_session().exec(sql)  # type: ignore
         page_resource.total = total.one()
         page_resource.data = list(result.all())

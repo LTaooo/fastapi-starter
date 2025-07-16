@@ -9,7 +9,7 @@ class BaseMysqlSession(ABC):
         self._session = session
         self._depth = 0
 
-    def get_session(self):
+    def get_session(self) -> AsyncSession:
         return self._session
 
     async def commit(self):
