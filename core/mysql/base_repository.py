@@ -7,6 +7,7 @@ from sqlmodel import select
 
 from core.exception.runtime_exception import RuntimeException
 from core.mysql.base_mysql_session import BaseMysqlSession
+from core.mysql.orm.auto_time import AutoTime
 from core.mysql.page_resource import PageResource
 from core.types.types import SQL_MODEL_TYPE, FILTER_TYPE
 
@@ -36,6 +37,24 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         result = await session.get_session().exec(sql)  # type: ignore
         return result.first()
 
+    async def update(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE, update_data: dict | BaseModel) -> SQL_MODEL_TYPE:
+        if isinstance(update_data, BaseModel):
+            update_data = update_data.model_dump()
+        for key, value in update_data.items():
+            setattr(model, key, value)
+        return await self.save(session, model)
+
+    async def create(self, session: BaseMysqlSession, param: BaseModel | dict) -> SQL_MODEL_TYPE:
+        if isinstance(param, BaseModel):
+            param = param.model_dump()
+        model = self._model_class()(**param)
+        return await self.save(session, model)
+
+    def auto_set_timestamp(self, model: SQL_MODEL_TYPE) -> SQL_MODEL_TYPE:
+        if isinstance(model, AutoTime):
+            model.auto_set_time()
+        return model
+
     async def list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> list[SQL_MODEL_TYPE]:
         sql = self._filter(param)
         result = await session.get_session().exec(sql)  # type: ignore
@@ -46,7 +65,11 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         return await self._for_page(session, param.page or 1, param.limit or 20, sql)
 
     async def save(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE) -> SQL_MODEL_TYPE:
-        session.get_session().add(model)
+        self.auto_set_timestamp(model)
+        if not model.get_primary_key():
+            session.get_session().add(model)
+        else:
+            await session.get_session().merge(model)
         await session.get_session().flush()
         return model
 

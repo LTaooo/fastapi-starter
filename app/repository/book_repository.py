@@ -3,10 +3,9 @@ from typing import Type
 from sqlalchemy import Select
 from sqlmodel import col, select
 
-from app.repository.params.book_repository_param import BookFilter, BookCreate
+from app.repository.params.book_repository_param import BookFilter
 from core.mysql.base_repository import BaseRepository
 from app.model.book import Book
-from core.mysql.database.app.app_session import AppSession
 
 
 class BookRepository(BaseRepository[Book, BookFilter]):
@@ -15,10 +14,6 @@ class BookRepository(BaseRepository[Book, BookFilter]):
 
     def filter_class(self) -> Type[BookFilter]:
         return BookFilter
-
-    async def create(self, session: AppSession, param: BookCreate) -> Book:
-        book = Book(**param.model_dump(exclude_none=True))
-        return await self.save(session, book)
 
     def _filter(self, param: BookFilter) -> Select[tuple[Book]]:
         """

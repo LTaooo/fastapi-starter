@@ -11,5 +11,5 @@ class BookFilter(BaseFilter):
 
 class BookCreate(BaseModel):
     name: str = Field(description='书名')
-    created_at: int = Field(description='创建时间', default_factory=DateTime.now)
-    updated_at: int = Field(description='更新时间', default_factory=DateTime.now)
+    created_at: int = Field(description='创建时间', default_factory=DateTime.timestamp)
+    updated_at: int = Field(description='更新时间', default_factory=DateTime.timestamp)

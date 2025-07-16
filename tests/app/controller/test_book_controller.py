@@ -28,9 +28,8 @@ async def test_book_repository_create(app_session: AppSession):
     repository = BookRepository()
     book = await repository.find(session=app_session, pk=1)
     assert book is not None
-    await app_session.commit()
 
-    async with app_session.transaction():
+    async with app_session.transaction(True):
         book.name = 'test' + DateTime.datetime()
         book1 = await repository.create(app_session, BookCreate(name='test'))
         book2 = await repository.create(app_session, BookCreate(name='test'))
@@ -42,7 +41,7 @@ async def test_book_repository_create(app_session: AppSession):
     book.name = 'test2' + DateTime.datetime()
     await app_session.commit()
 
-    book.name = 'test3' + DateTime.datetime()
+    await repository.update(app_session, book, {'name': 'test3' + DateTime.datetime()})
     await app_session.commit()
 
 
