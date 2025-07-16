@@ -1,7 +1,7 @@
 from abc import ABC
 from contextlib import asynccontextmanager
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class BaseMysqlSession(ABC):

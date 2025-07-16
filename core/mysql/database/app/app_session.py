@@ -1,5 +1,6 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.mysql.base_mysql_session import BaseMysqlSession
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 class AppSession(BaseMysqlSession):

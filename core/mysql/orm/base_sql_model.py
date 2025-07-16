@@ -1,7 +1,7 @@
-from sqlmodel import SQLModel
+from sqlalchemy.orm import DeclarativeBase
 
 
-class BaseSQLModel(SQLModel):
+class BaseSQLModel(DeclarativeBase):
     def get_primary_field(self) -> str:
         return 'id'
 

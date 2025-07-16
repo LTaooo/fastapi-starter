@@ -1,7 +1,6 @@
 from typing import Type
 
 from sqlalchemy import Select
-from sqlmodel import col
 
 from app.repository.params.book_repository_param import BookFilter
 from core.mysql.base_repository import BaseRepository
@@ -20,8 +19,8 @@ class BookRepository(BaseRepository[Book, BookFilter]):
         基本筛选
         """
         if param.ids is not None:
-            sql = sql.where(col(Book.id).in_(param.ids))
+            sql = sql.where(Book.id.in_(param.ids))
         if param.name_like is not None:
-            sql = sql.where(col(Book.name).like(f'%{param.name_like}%'))
+            sql = sql.where(Book.name.like(f'%{param.name_like}%'))
 
         return sql

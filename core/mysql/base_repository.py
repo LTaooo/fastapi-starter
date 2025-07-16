@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Generic, Type
 
 from pydantic import BaseModel
-from sqlalchemy import Select, func
-from sqlmodel import select, col
+from sqlalchemy import Select, func, select
 
 from core.exception.runtime_exception import RuntimeException
 from core.mysql.base_mysql_session import BaseMysqlSession
@@ -34,8 +33,9 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
 
     async def get_one(self, session: BaseMysqlSession, param: FILTER_TYPE) -> SQL_MODEL_TYPE | None:
         sql = await self._common_filter(param)
-        result = await session.get_session().exec(sql)  # type: ignore
-        return result.first()
+        sql = sql.limit(1)
+        result = await session.get_session().execute(sql)
+        return result.scalar_one_or_none()
 
     async def update(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE, update_data: dict | BaseModel) -> SQL_MODEL_TYPE:
         if isinstance(update_data, BaseModel):
@@ -74,13 +74,18 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         return model
 
     async def _for_page(self, session: BaseMysqlSession, page: int, limit: int, sql: Select) -> PageResource[SQL_MODEL_TYPE]:
-        page_resource: PageResource[SQL_MODEL_TYPE] = PageResource(total=0, data=[], limit=limit, page=page)
-        total = await session.get_session().exec(select(func.count()).select_from(sql.subquery()))
+        page_resource = PageResource(total=0, data=[], limit=limit, page=page)
+
+        count_sql = select(func.count()).select_from(sql.order_by(None).subquery())
+        total_result = await session.get_session().execute(count_sql)
+        page_resource.total = total_result.scalar_one()
+
         offset = (page - 1) * limit
-        sql = sql.offset(offset).limit(limit)
-        result = await session.get_session().exec(sql)  # type: ignore
-        page_resource.total = total.one()
-        page_resource.data = list(result.all())
+        paginated_sql = sql.offset(offset).limit(limit)
+
+        result = await session.get_session().execute(paginated_sql)
+        page_resource.data = list(result.scalars().all())  # scalar results only
+
         return page_resource
 
     async def delete_by_id(self, session: BaseMysqlSession, pk: int) -> None:
@@ -116,7 +121,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
 
         if param.order_bys is not None:
             for order_by in param.order_bys:
-                sql = sql.order_by(col(order_by.field).asc() if order_by.is_asc else col(order_by.field).desc())
+                sql = sql.order_by(order_by.field.asc() if order_by.is_asc else order_by.field.desc())
 
         await self._filter(sql, param)
 

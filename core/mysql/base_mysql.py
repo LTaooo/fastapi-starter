@@ -1,8 +1,7 @@
 from abc import ABC, ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, ClassVar, Type, TypeVar, Generic
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession
 
 from config.mysql_config import MysqlConfig
 from core.mysql.base_mysql_session import BaseMysqlSession

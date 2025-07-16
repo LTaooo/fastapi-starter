@@ -15,7 +15,7 @@ class BaseRes(ABC, BaseModel, Generic[MODEL_TYPE, SQL_MODEL_TYPE]):
 
     @classmethod
     def from_model(cls, data: SQL_MODEL_TYPE) -> Self:
-        return cls(**data.model_dump())
+        return cls(**data.__dict__)
 
     @classmethod
     def from_model_or_none(cls, data: SQL_MODEL_TYPE | None) -> Self | None:
