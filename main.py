@@ -1,3 +1,4 @@
+from config.mcp_config import MCPConfig
 from core import logger
 from core.dto.common_res import CommonRes
 from core.exception.handle import exception_handle
@@ -30,4 +31,5 @@ middleware.register(app)
 if __name__ == '__main__':
     Logger.get().info('项目启动中...')
     config = Config.get(AppConfig)
-    uvicorn.run('main:app', host=config.host, port=config.port, workers=config.workers)
+    mcp_config = Config.get(MCPConfig)
+    uvicorn.run('main:app', host=config.host, port=config.port, workers=1 if mcp_config.enable else config.workers)
