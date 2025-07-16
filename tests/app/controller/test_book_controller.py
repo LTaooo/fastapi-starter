@@ -49,7 +49,7 @@ async def test_book_repository_create(app_session: AppSession):
 async def test_book_repository_query(app_session: AppSession):
     repository = BookRepository()
     book_filter = BookFilter(name_like='test')
-    book_filter.order_by(Book.created_at, False)  # type: ignore
+    book_filter.order_by(Book.created_at.desc())
     book = await repository.get_one(app_session, book_filter)
     assert isinstance(book, Book)
 

@@ -121,7 +121,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
 
         if param.order_bys is not None:
             for order_by in param.order_bys:
-                sql = sql.order_by(order_by.field.asc() if order_by.is_asc else order_by.field.desc())
+                sql = sql.order_by(order_by)
 
         await self._filter(sql, param)
 
