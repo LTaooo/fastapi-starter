@@ -84,7 +84,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         paginated_sql = sql.offset(offset).limit(limit)
 
         result = await session.get_session().execute(paginated_sql)
-        page_resource.data = list(result.scalars().all())  # scalar results only
+        page_resource.data = list(result.scalars().all())
 
         return page_resource
 
