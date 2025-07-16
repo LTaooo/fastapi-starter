@@ -6,7 +6,7 @@ from core.util.datetime import DateTime
 
 class BookFilter(BaseFilter):
     ids: list[int] | None = Field(default=None, description='书籍id')
-    name: str | None = Field(default=None, description='书名')
+    name_like: str | None = Field(default=None, description='书名')
 
 
 class BookCreate(BaseModel):

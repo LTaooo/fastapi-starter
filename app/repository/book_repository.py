@@ -1,7 +1,7 @@
 from typing import Type
 
 from sqlalchemy import Select
-from sqlmodel import col, select
+from sqlmodel import col
 
 from app.repository.params.book_repository_param import BookFilter
 from core.mysql.base_repository import BaseRepository
@@ -15,19 +15,13 @@ class BookRepository(BaseRepository[Book, BookFilter]):
     def filter_class(self) -> Type[BookFilter]:
         return BookFilter
 
-    def _filter(self, param: BookFilter) -> Select[tuple[Book]]:
+    async def _filter(self, sql: Select[tuple[Book]], param: BookFilter) -> Select[tuple[Book]]:
         """
-        通用筛选
-        :param param:
-        :return:
+        基本筛选
         """
-        sql = select(Book)
         if param.ids is not None:
-            sql = sql.where(col('id').in_(param.ids))
-        if param.name is not None:
-            sql = sql.where(col('name').like(f'%{param.name}%'))
-        if param.limit is not None:
-            sql = sql.limit(param.limit)
-        if param.page is not None:
-            sql = sql.offset(param.page)
+            sql = sql.where(col(Book.id).in_(param.ids))
+        if param.name_like is not None:
+            sql = sql.where(col(Book.name).like(f'%{param.name_like}%'))
+
         return sql

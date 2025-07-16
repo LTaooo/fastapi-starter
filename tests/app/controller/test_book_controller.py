@@ -1,8 +1,9 @@
 from httpx import AsyncClient
 
 from app.dto.request.book_req import BookBulkUpdateNameReq
+from app.model.book import Book
 from app.repository.book_repository import BookRepository
-from app.repository.params.book_repository_param import BookCreate
+from app.repository.params.book_repository_param import BookCreate, BookFilter
 from core.mysql.database.app.app_session import AppSession
 from core.status_enum import StatusEnum
 from core.util.datetime import DateTime
@@ -43,6 +44,14 @@ async def test_book_repository_create(app_session: AppSession):
 
     await repository.update(app_session, book, {'name': 'test3' + DateTime.datetime()})
     await app_session.commit()
+
+
+async def test_book_repository_query(app_session: AppSession):
+    repository = BookRepository()
+    book_filter = BookFilter(name_like='test')
+    book_filter.order_by(Book.created_at, False)  # type: ignore
+    book = await repository.get_one(app_session, book_filter)
+    assert isinstance(book, Book)
 
 
 async def test_bulk_update_name(client: AsyncClient):

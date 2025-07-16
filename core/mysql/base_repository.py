@@ -3,7 +3,7 @@ from typing import Generic, Type
 
 from pydantic import BaseModel
 from sqlalchemy import Select, func
-from sqlmodel import select
+from sqlmodel import select, col
 
 from core.exception.runtime_exception import RuntimeException
 from core.mysql.base_mysql_session import BaseMysqlSession
@@ -33,7 +33,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         return model
 
     async def get_one(self, session: BaseMysqlSession, param: FILTER_TYPE) -> SQL_MODEL_TYPE | None:
-        sql = self._filter(param)
+        sql = await self._common_filter(param)
         result = await session.get_session().exec(sql)  # type: ignore
         return result.first()
 
@@ -56,12 +56,12 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         return model
 
     async def list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> list[SQL_MODEL_TYPE]:
-        sql = self._filter(param)
+        sql = await self._common_filter(param)
         result = await session.get_session().exec(sql)  # type: ignore
         return list(result.all())
 
     async def page_list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> PageResource[SQL_MODEL_TYPE]:
-        sql = self._filter(param)
+        sql = await self._common_filter(param)
         return await self._for_page(session, param.page or 1, param.limit or 20, sql)
 
     async def save(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE) -> SQL_MODEL_TYPE:
@@ -93,10 +93,31 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         await session.get_session().delete(model)
 
     @abstractmethod
-    def _filter(self, param: BaseModel) -> Select[tuple[SQL_MODEL_TYPE]]:
+    async def _filter(self, sql: Select[tuple[SQL_MODEL_TYPE]], param: FILTER_TYPE) -> Select[tuple[SQL_MODEL_TYPE]]:
+        """
+        筛选
+        :param param:
+        :return:
+        """
+        raise NotImplementedError
+
+    async def _common_filter(self, param: FILTER_TYPE) -> Select[tuple[SQL_MODEL_TYPE]]:
         """
         通用筛选
         :param param:
         :return:
         """
-        raise NotImplementedError
+        sql = select(self._model_class())
+        if param.limit is not None:
+            sql = sql.limit(param.limit)
+
+        if param.page is not None:
+            sql = sql.offset(param.get_offset())
+
+        if param.order_bys is not None:
+            for order_by in param.order_bys:
+                sql = sql.order_by(col(order_by.field).asc() if order_by.is_asc else col(order_by.field).desc())
+
+        await self._filter(sql, param)
+
+        return sql
