@@ -30,7 +30,7 @@ async def test_book_repository_create(app_session: AppSession):
     book = await repository.find(session=app_session, pk=1)
     assert book is not None
 
-    async with app_session.transaction(True):
+    async with app_session.transaction():
         book.name = 'test' + DateTime.datetime()
         book1 = await repository.create(app_session, BookCreate(name='test'))
         book2 = await repository.create(app_session, BookCreate(name='test'))

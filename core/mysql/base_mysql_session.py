@@ -16,13 +16,9 @@ class BaseMysqlSession(ABC):
         return await self._session.commit()
 
     @asynccontextmanager
-    async def transaction(self, nested=False):
-        """
-        Args:
-            nested: 是否嵌套事务
-        """
+    async def transaction(self):
         self._depth += 1
-        is_nested = self._depth > 1 or nested
+        is_nested = self._depth > 1 or self._session.in_transaction()
         try:
             if not is_nested:
                 async with self._session.begin():
@@ -30,9 +26,5 @@ class BaseMysqlSession(ABC):
             else:
                 async with self._session.begin_nested():
                     yield
-            await self._session.commit()
-        except Exception:
-            await self._session.rollback()
-            raise
         finally:
             self._depth -= 1
