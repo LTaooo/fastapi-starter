@@ -53,9 +53,9 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
             yield cls.session_class()(session)
 
     @classmethod
-    async def get_session(cls) -> _SESSION:
+    async def get_session(cls) -> AsyncGenerator[_SESSION, None]:
         async with cls._session() as session:
-            return cls.session_class()(session)
+            yield cls.session_class()(session)
 
     @classmethod
     async def close(cls):

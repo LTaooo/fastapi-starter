@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body
 
-from app.dto.request.book_req import BookGetReq, BookListReq, BookCreateReq, BookBulkUpdateNameReq
+from app.dto.request.book_req import BookListReq, BookCreateReq, BookBulkUpdateNameReq
 from core.di.container import Container
 from core.dto.common_res import CommonRes
 from core.dto.page_res import PageRes
@@ -18,9 +18,9 @@ router = APIRouter(prefix='/api/book', tags=['book'])
 _book_service = Container().get(BookService)
 
 
-@router.post('/get', summary='根据id获取书')
-async def get_book(param: BookGetReq, session: AppSession = Depends(AppDatabase.get_session)) -> CommonRes[BookGetRes]:
-    model = await _book_service.get(session, param.id)
+@router.get('/get', summary='根据id获取书')
+async def get_book(book_id: int, session: AppSession = Depends(AppDatabase.get_session)) -> CommonRes[BookGetRes]:
+    model = await _book_service.get(session, book_id)
     return Response.success(BookGetRes.from_model_or_none(model))
 
 
