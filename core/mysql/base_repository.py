@@ -38,6 +38,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         return result.scalar_one_or_none()
 
     async def update(self, session: BaseMysqlSession, model: SQL_MODEL_TYPE, update_data: dict | BaseModel) -> SQL_MODEL_TYPE:
+        model = await session.get_session().merge(model)
         if isinstance(update_data, BaseModel):
             update_data = update_data.model_dump()
         for key, value in update_data.items():
@@ -68,8 +69,6 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         self.auto_set_timestamp(model)
         if not model.get_primary_key():
             session.get_session().add(model)
-        else:
-            await session.get_session().merge(model)
         await session.get_session().flush()
         return model
 

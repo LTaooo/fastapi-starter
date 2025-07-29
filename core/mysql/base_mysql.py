@@ -23,7 +23,7 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
         cls._engine = create_async_engine(
             f'mysql+aiomysql://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}',
             pool_size=5,
-            max_overflow=10,
+            max_overflow=50,
             echo=config.echo,
         )
 
