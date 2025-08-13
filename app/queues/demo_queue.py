@@ -8,6 +8,10 @@ from core.rabbitmq.base_producer import BaseProducer
 from core.rabbitmq.rabbitmq import RabbitMQ
 
 
+def _get_routing_key() -> str:
+    return Config.get(AppConfig).app_name + '_demo'
+
+
 class DemoConsumer(BaseConsumer):
     async def consume(self) -> Result:
         data = self.message.body.decode()
@@ -20,11 +24,11 @@ class DemoConsumer(BaseConsumer):
 
     @classmethod
     def get_queue_name(cls) -> str:
-        return cls.get_routing_key()
+        return Config.get(AppConfig).app_name + '_demo'
 
     @classmethod
     def get_routing_key(cls) -> str:
-        return Config.get(AppConfig).app_name + '_demo'
+        return _get_routing_key()
 
     @classmethod
     def get_qos(cls) -> int:
@@ -34,8 +38,8 @@ class DemoConsumer(BaseConsumer):
 class DemoProducer(BaseProducer):
     @classmethod
     async def create(cls, data: str):
-        await RabbitMQ().publish(data, cls.get_routing_key())
+        await RabbitMQ().publish(data, _get_routing_key())
 
     @classmethod
     def get_routing_key(cls) -> str:
-        return Config.get(AppConfig).app_name + '_demo'
+        return _get_routing_key()

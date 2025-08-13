@@ -1,6 +1,7 @@
 from redis.asyncio import Redis as AsyncIORedis, ConnectionPool
 from config.redis_config import RedisConfig
 from core.config import Config
+from core.logger import Logger
 from core.singleton_meta import SingletonMeta
 
 
@@ -16,6 +17,10 @@ class Redis(metaclass=SingletonMeta):
             decode_responses=True,
         )
         self.redis = AsyncIORedis(connection_pool=self.pool)
+
+    async def connect(self):
+        await self.redis.ping()
+        Logger.get().info('Redis连接成功')
 
     def get_instance(self) -> AsyncIORedis:
         return self.redis
