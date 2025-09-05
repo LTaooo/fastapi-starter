@@ -14,6 +14,8 @@ class Redis(metaclass=SingletonMeta):
             db=config.db,
             password=config.password,
             max_connections=config.connection_pool,
+            health_check_interval=60,
+            retry_on_timeout=True,
             decode_responses=True,
         )
         self.redis = AsyncIORedis(connection_pool=self.pool)
