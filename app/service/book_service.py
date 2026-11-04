@@ -30,7 +30,9 @@ class BookService:
         return result
 
     def _list_req_to_filter(self, req: BookListReq) -> BookFilter:
-        return self.bookRepository.filter_class()(**req.model_dump())
+        data = req.model_dump()
+        data['name_like'] = data.pop('name', None)
+        return self.bookRepository.filter_class()(**data)
 
     async def bulk_update_name(self, session: AppSession, req: List[BookBulkUpdateNameReq]) -> None:
         async with session.transaction():

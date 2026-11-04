@@ -2,14 +2,16 @@ import base64
 import hashlib
 import hmac
 from datetime import datetime
-from typing import ClassVar
 
 import aiohttp
-import json
-from loguru import logger
 
 from config.app_config import AppConfig
+from config.feishu_config import FeishuConfig
 from core.config import Config
+from core.logger import Logger
+
+_MAX_CONTENT_LENGTH = 2000
+_MAX_TAIL_LENGTH = 500
 
 
 class FeishuRobot:
@@ -17,47 +19,39 @@ class FeishuRobot:
     飞书机器人
     """
 
-    base_url: ClassVar[str] = 'https://open.feishu.cn/open-apis/bot/v2/hook/'
-
-    default_group: ClassVar[str] = '603bc7ea-d763-4363-94a4-xxxx'
-    default_token: ClassVar[str] = 'xxx'
-
     @classmethod
-    async def send_text_message(cls, content: str, group: str | None = '', token: str | None = None):
-        """
-        发送文本消息到飞书群
-        :param content: 要发送的文本内容
-        :param group: 群组ID, 默认为default_group
-        :param token: token, 默认为default_token
-        :return: 响应结果
-        """
-        url = cls.base_url + (group or cls.default_group)
-        token = token or cls.default_token
-        timestamp = str(int(datetime.now().timestamp()))
-        sign = cls._gen_sign(timestamp, token)
-        content = '\n'.join(
-            [f'项目: {Config().get(AppConfig).app_name}', f'环境: {Config().get(AppConfig).app_env.value}', f'错误信息: {content}']
-        )
-        data = {'msg_type': 'text', 'content': {'text': content}, 'timestamp': timestamp, 'sign': sign}
+    async def send_text_message(cls, content: str) -> None:
         try:
-            result = await cls._post_request(url, data)
-            return result
+            config = Config.get(FeishuConfig)
+            if not config.enable or not config.webhook:
+                return
+
+            app_config = Config.get(AppConfig)
+            content = '\n'.join([f'项目: {app_config.app_name}', f'环境: {app_config.app_env.value}', f'错误信息: {content}'])
+            if len(content) > _MAX_CONTENT_LENGTH:
+                marker = '\n...(已截断)...\n'
+                head_length = _MAX_CONTENT_LENGTH - _MAX_TAIL_LENGTH - len(marker)
+                content = content[:head_length] + marker + content[-_MAX_TAIL_LENGTH:]
+
+            data = {'msg_type': 'text', 'content': {'text': content}}
+            if config.secret:
+                timestamp = str(int(datetime.now().timestamp()))
+                data['timestamp'] = timestamp
+                data['sign'] = cls._gen_sign(timestamp, config.secret)
+
+            await cls._post_request(config.webhook, data, config.timeout)
         except Exception as e:
-            logger.error(f'机器人发送消息时出现请求错误: {e}')
-        return None
+            Logger.get().error(f'机器人发送消息失败: {e}')
 
     @classmethod
-    async def _post_request(cls, url, data):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=json.dumps(data)) as response:
-                response.raise_for_status()  # 检查响应状态码
-                return await response.json()
+    async def _post_request(cls, url: str, data: dict, timeout: int) -> None:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout)) as session:
+            async with session.post(url, json=data) as response:
+                response.raise_for_status()
 
     @classmethod
-    def _gen_sign(cls, timestamp: str, secret):
-        # 拼接timestamp和secret
-        string_to_sign = '{}\n{}'.format(timestamp, secret)
+    def _gen_sign(cls, timestamp: str, secret: str) -> str:
+        # 飞书签名: 以 "{timestamp}\n{secret}" 为密钥, 对空消息做 HMAC-SHA256 后 base64
+        string_to_sign = f'{timestamp}\n{secret}'
         hmac_code = hmac.new(string_to_sign.encode('utf-8'), digestmod=hashlib.sha256).digest()
-        # 对结果进行base64处理
-        sign = base64.b64encode(hmac_code).decode('utf-8')
-        return sign
+        return base64.b64encode(hmac_code).decode('utf-8')

@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: '3.12'
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Prepare test environment
+        run: cp .env.example .env
+      - name: Create test database schema
+        run: |
+          uv run python - <<'PY'
+          import asyncio
+
+          from sqlalchemy.engine import URL
+          from sqlalchemy.ext.asyncio import create_async_engine
+
+          import app.model.book  # noqa: F401
+          from config.mysql_config import MysqlConfig
+          from core.config import Config
+          from core.mysql.orm.base_sql_model import BaseSQLModel
+
+
+          async def main():
+              config = Config.get(MysqlConfig)
+              engine = create_async_engine(
+                  URL.create(
+                      'mysql+aiomysql',
+                      username=config.user,
+                      password=config.password,
+                      host=config.host,
+                      port=config.port,
+                      database=config.database,
+                  )
+              )
+              async with engine.begin() as connection:
+                  await connection.run_sync(BaseSQLModel.metadata.create_all)
+              await engine.dispose()
+
+
+          asyncio.run(main())
+          PY
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: Ruff format
+        run: uv run ruff format --check .
+      - name: Pyright
+        run: uv run pyright
+      - name: Pytest
+        run: uv run pytest

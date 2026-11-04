@@ -66,7 +66,7 @@ class Logger(metaclass=SingletonMeta):
         level = level.lower()
         paths = ['logs', cls.service_name, level, f'{cls.service_name}-{level}.log']
         log_file = str(Helper.with_root_path(paths))
-        os.makedirs(os.path.dirname(log_file), exist_ok=True, mode=0o644)
+        os.makedirs(os.path.dirname(log_file), exist_ok=True, mode=0o755)
         return log_file
 
     @classmethod

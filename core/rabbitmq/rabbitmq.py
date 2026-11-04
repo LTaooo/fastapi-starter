@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from typing import Type
 
@@ -41,7 +40,7 @@ class RabbitMQ(metaclass=SingletonMeta):
         channel = await self.get_channel()
         await channel.declare_exchange(self.config.exchange, aio_pika.ExchangeType.DIRECT)
         for consumer_class in self.config.get_consumers():
-            asyncio.create_task(self.consume(consumer_class))
+            await self.consume(consumer_class)
 
     async def get_channel(self) -> aio_pika.Channel:
         if not self.config.enable:
@@ -88,6 +87,6 @@ class RabbitMQ(metaclass=SingletonMeta):
         await exchange.publish(aio_pika.Message(body=message.encode()), routing_key=routing_key)
 
     async def close(self):
-        if not self.config.enable:
+        if not self.config.enable or not hasattr(self, 'connection_pool'):
             return
         await self.connection_pool.close()

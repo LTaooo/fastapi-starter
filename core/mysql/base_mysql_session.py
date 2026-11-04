@@ -17,14 +17,27 @@ class BaseMysqlSession(ABC):
 
     @asynccontextmanager
     async def transaction(self):
+        """
+        最外层事务负责提交, 包括进入前已自动开启的事务; 嵌套事务使用保存点
+        """
+        is_outer = self._depth == 0
         self._depth += 1
-        is_nested = self._depth > 1 or self._session.in_transaction()
         try:
-            if not is_nested:
-                async with self._session.begin():
-                    yield
-            else:
+            if not is_outer:
                 async with self._session.begin_nested():
                     yield
+                return
+
+            if self._session.in_transaction():
+                try:
+                    yield
+                except BaseException:
+                    await self._session.rollback()
+                    raise
+                await self._session.commit()
+                return
+
+            async with self._session.begin():
+                yield
         finally:
             self._depth -= 1

@@ -58,8 +58,12 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
 
     async def list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> list[SQL_MODEL_TYPE]:
         sql = await self._common_filter(param)
-        result = await session.get_session().exec(sql)  # type: ignore
-        return list(result.all())
+        if param.limit is not None:
+            sql = sql.limit(param.limit)
+        if param.page is not None:
+            sql = sql.offset(param.get_offset())
+        result = await session.get_session().execute(sql)
+        return list(result.scalars().all())
 
     async def page_list(self, session: BaseMysqlSession, param: FILTER_TYPE) -> PageResource[SQL_MODEL_TYPE]:
         sql = await self._common_filter(param)
@@ -73,19 +77,13 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         return model
 
     async def _for_page(self, session: BaseMysqlSession, page: int, limit: int, sql: Select) -> PageResource[SQL_MODEL_TYPE]:
-        page_resource = PageResource(total=0, data=[], limit=limit, page=page)
-
         count_sql = select(func.count()).select_from(sql.order_by(None).subquery())
         total_result = await session.get_session().execute(count_sql)
-        page_resource.total = total_result.scalar_one()
+        total = total_result.scalar_one()
 
-        offset = (page - 1) * limit
-        paginated_sql = sql.offset(offset).limit(limit)
-
+        paginated_sql = sql.offset((page - 1) * limit).limit(limit)
         result = await session.get_session().execute(paginated_sql)
-        page_resource.data = list(result.scalars().all())
-
-        return page_resource
+        return PageResource(total=total, data=list(result.scalars().all()), limit=limit, page=page)
 
     async def delete_by_id(self, session: BaseMysqlSession, pk: int) -> None:
         model = await self.find(session, pk)
@@ -107,21 +105,11 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
 
     async def _common_filter(self, param: FILTER_TYPE) -> Select[tuple[SQL_MODEL_TYPE]]:
         """
-        通用筛选
-        :param param:
-        :return:
+        通用筛选, 只负责条件与排序, 分页由调用方应用
         """
         sql = select(self._model_class())
-        if param.limit is not None:
-            sql = sql.limit(param.limit)
-
-        if param.page is not None:
-            sql = sql.offset(param.get_offset())
-
-        if param.order_bys is not None:
+        if param.order_bys:
             for order_by in param.order_bys:
                 sql = sql.order_by(order_by)
 
-        await self._filter(sql, param)
-
-        return sql
+        return await self._filter(sql, param)

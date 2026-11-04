@@ -1,5 +1,7 @@
-import tomllib
+import socket
 from typing import Callable
+
+import yaml
 from pydantic import Field, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from v2.nacos import RegisterInstanceParam, ConfigParam
@@ -7,6 +9,7 @@ from v2.nacos import RegisterInstanceParam, ConfigParam
 from config.app_config import AppConfig
 from config.env import ENV_FILES
 from core.config import Config
+from core.logger import Logger
 from core.util.helper import Helper
 
 
@@ -15,12 +18,18 @@ class NacosListenerConfig(BaseModel):
     listener: Callable = Field(description='监听器')
 
 
-async def _config_listener(tenant: str, data_id: str, group: str, content: str):
+async def _config_listener(tenant: str, group: str, data_id: str, content: str):
     """
     nacos配置监听器
+
+    参数顺序固定为 (tenant, group, data_id, content)，不可调整。
     """
-    content_dict = tomllib.loads(content)
-    print(content_dict)
+    data = yaml.safe_load(content or '')
+    if not isinstance(data, dict):
+        Logger.get().warning(f'Nacos配置格式错误, 已忽略: {data_id}')
+        return
+    Config().update_config(data)
+    Logger.get().info(f'Nacos配置已刷新: {data_id}')
 
 
 _app_config = Config.get(AppConfig)
@@ -29,6 +38,7 @@ _app_config = Config.get(AppConfig)
 class NacosConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=ENV_FILES, env_file_encoding='utf-8', extra='ignore')
     enable: bool = Field(description='是否启用Nacos', alias='NACOS_ENABLE', default=False)
+    register_ip: str = Field(description='服务注册IP, 为空时自动获取本机IP', alias='NACOS_REGISTER_IP', default='')
     server_addresses: str = Field(description='Nacos服务器地址', alias='NACOS_SERVER_ADDRESSES', default='127.0.0.1:8848')
     namespace: str = Field(description='Nacos命名空间', alias='NACOS_NAMESPACE', default='dev')
     group: str = Field(description='Nacos组', alias='NACOS_GROUP', default='DEFAULT_GROUP')
@@ -40,7 +50,7 @@ class NacosConfig(BaseSettings):
         return [
             RegisterInstanceParam(
                 service_name=_app_config.app_name,
-                ip='127.0.0.1',
+                ip=self.get_register_ip(),
                 port=_app_config.port,
                 group_name=self.group,
                 weight=1,
@@ -48,9 +58,19 @@ class NacosConfig(BaseSettings):
             )
         ]
 
+    def get_register_ip(self) -> str:
+        if self.register_ip:
+            return self.register_ip
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                sock.connect(('8.8.8.8', 80))
+                return sock.getsockname()[0]
+        except OSError as e:
+            raise RuntimeError('无法自动获取本机IP, 请配置 NACOS_REGISTER_IP') from e
+
     @staticmethod
     def get_listener_data() -> list[NacosListenerConfig]:
-        return [NacosListenerConfig(data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yml', listener=_config_listener)]
+        return [NacosListenerConfig(data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yaml', listener=_config_listener)]
 
     def get_config_data(self) -> ConfigParam:
         return ConfigParam(data_id=f'{_app_config.app_name}-{_app_config.app_env.value}.yaml', group=self.group, type='yaml')

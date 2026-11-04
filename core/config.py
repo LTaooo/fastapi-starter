@@ -29,11 +29,17 @@ class Config:
         """将嵌套字典扁平化，例如 {'a': {'b': 1}} -> {'a.b': 1}"""
         items = {}
         for k, v in d.items():
+            # 顶层非字典值无法映射为 "段.字段" 配置项, 跳过
+            if not isinstance(v, dict):
+                continue
             for k1, v1 in v.items():
                 items[f'{k}{sep}{k1}' if k else k1] = v1
         return items
 
     @classmethod
     def update_config(cls, data: dict):
+        # Nacos 内容可能解析为 list/scalar, 非映射配置直接忽略
+        if not isinstance(data, dict):
+            return
         cls.__origin_config = data
         cls._configs = {}

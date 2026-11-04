@@ -63,7 +63,7 @@ class Nacos(metaclass=SingletonMeta):
         if not self._config.enable:
             return {}
         data = await self._config_service.get_config(config_param)
-        return yaml.safe_load(data or '')
+        return yaml.safe_load(data or '') or {}
 
     async def close(self):
         if not self._config.enable:

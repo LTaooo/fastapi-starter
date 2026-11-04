@@ -2,6 +2,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, ClassVar, Type, TypeVar, Generic
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession
+from sqlalchemy.engine import URL
 
 from config.mysql_config import MysqlConfig
 from core.mysql.base_mysql_session import BaseMysqlSession
@@ -23,7 +24,14 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
         if not config.enable:
             return
         cls._engine = create_async_engine(
-            f'mysql+aiomysql://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}',
+            URL.create(
+                'mysql+aiomysql',
+                username=config.user,
+                password=config.password,
+                host=config.host,
+                port=config.port,
+                database=config.database,
+            ),
             pool_size=5,
             max_overflow=50,
             echo=config.echo,

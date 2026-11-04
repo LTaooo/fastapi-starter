@@ -40,9 +40,7 @@ def register(app: FastAPI):
         )
 
     @app.exception_handler(Exception)
-    async def _exception_handler(cls, request: Request, exc: Exception):
-        # 获取堆栈信息并格式化为单一字符串
-        # 获取堆栈信息并格式化为单一字符串
+    async def _exception_handler(request: Request, exc: Exception):
         message = Helper.exception_str(exc, True)
         Logger.get().error(message)
         if Config.get(AppConfig).is_prod_or_test():
