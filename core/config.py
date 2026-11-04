@@ -1,10 +1,8 @@
-from dotenv import load_dotenv
 from typing import Type, TypeVar, ClassVar
 from pydantic import BaseModel
 
 from config.base.base_nacos_config import BaseNacosConfig
 
-load_dotenv()
 _T = TypeVar('_T', bound=BaseModel)
 
 

@@ -2,6 +2,8 @@ from enum import Enum
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
+from config.env import ENV_FILES
+
 
 class AppEnvEnum(str, Enum):
     DEV = 'dev'
@@ -10,7 +12,7 @@ class AppEnvEnum(str, Enum):
 
 
 class AppConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+    model_config = SettingsConfigDict(env_file=ENV_FILES, env_file_encoding='utf-8', extra='ignore')
     app_env: AppEnvEnum = Field(description='应用环境', default=AppEnvEnum.DEV)
     app_name: str = Field(description='应用名称', default='fastapi-starter')
     app_debug: bool = Field(description='是否开启调试模式', default=False)
