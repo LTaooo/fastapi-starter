@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from v2.nacos import RegisterInstanceParam, ConfigParam
 
 from config.app_config import AppConfig
+from config.env import ENV_FILES
 from core.config import Config
 from core.util.helper import Helper
 
@@ -26,7 +27,7 @@ _app_config = Config.get(AppConfig)
 
 
 class NacosConfig(BaseSettings):
-    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
+    model_config = SettingsConfigDict(env_file=ENV_FILES, env_file_encoding='utf-8', extra='ignore')
     enable: bool = Field(description='是否启用Nacos', alias='NACOS_ENABLE', default=False)
     server_addresses: str = Field(description='Nacos服务器地址', alias='NACOS_SERVER_ADDRESSES', default='127.0.0.1:8848')
     namespace: str = Field(description='Nacos命名空间', alias='NACOS_NAMESPACE', default='dev')

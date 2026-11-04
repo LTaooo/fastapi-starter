@@ -1,6 +1,8 @@
 logs/
 .vscode/
 .env
+.env.*
+!.env.example
 *.diff
 .idea
 __pycache__
