@@ -32,4 +32,10 @@ if __name__ == '__main__':
     Logger.get().info('项目启动中...')
     config = Config.get(AppConfig)
     mcp_config = Config.get(MCPConfig)
-    uvicorn.run('main:app', host=config.host, port=config.port, workers=1 if mcp_config.enable else config.workers)
+    uvicorn.run(
+        'main:app',
+        host=config.host,
+        port=config.port,
+        workers=1 if mcp_config.enable else config.workers,
+        log_config=None,
+    )

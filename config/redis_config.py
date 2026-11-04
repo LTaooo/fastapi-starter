@@ -4,6 +4,7 @@ from config.base.base_nacos_config import BaseNacosConfig
 
 
 class RedisConfig(BaseNacosConfig):
+    enable: bool = Field(description='是否启用Redis', default=True, alias='redis.enable')
     host: str = Field(description='Redis主机地址', default='localhost1', alias='redis.host')
     port: int = Field(description='Redis端口号', default=6379, alias='redis.port')
     db: int = Field(description='Redis数据库', default=0, alias='redis.db')

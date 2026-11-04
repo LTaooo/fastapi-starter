@@ -18,6 +18,7 @@ dependencies = [
     "redis>=6.0.0",
     "uvicorn[standard]>=0.34.0",
     "sqlalchemy>=2.0.41",
+    "protobuf>=5.27.2,<6",
 ]
 
 [dependency-groups]
