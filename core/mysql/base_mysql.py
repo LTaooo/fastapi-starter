@@ -15,11 +15,13 @@ class SingletonABCMeta(ABCMeta, SingletonMeta):
 
 
 class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
-    _engine: ClassVar[AsyncEngine]
+    _engine: ClassVar[AsyncEngine | None] = None
 
     @classmethod
     def init(cls):
         config = cls.get_config()
+        if not config.enable:
+            return
         cls._engine = create_async_engine(
             f'mysql+aiomysql://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}',
             pool_size=5,
@@ -42,6 +44,8 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
     @classmethod
     @asynccontextmanager
     async def _session(cls) -> AsyncGenerator[AsyncSession, None]:
+        if cls._engine is None:
+            raise RuntimeError('MySQL未启用或未初始化')
         session = AsyncSession(cls._engine, expire_on_commit=False)
         try:
             yield session
@@ -61,4 +65,7 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
 
     @classmethod
     async def close(cls):
+        if cls._engine is None:
+            return
         await cls._engine.dispose()
+        cls._engine = None

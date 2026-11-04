@@ -15,6 +15,10 @@ class Logger(metaclass=SingletonMeta):
     _log_file: str
     _is_init: bool = False
     service_name: str = Config.get(AppConfig).app_name
+    _log_format: str = (
+        '<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | '
+        '<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'
+    )
 
     @classmethod
     def init(cls):
@@ -27,33 +31,33 @@ class Logger(metaclass=SingletonMeta):
             sys.stdout,
             level='INFO',
             colorize=True,
-            format='<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>',
+            format=cls._log_format,
             enqueue=True,
         )
 
-        format_str = (
-            '{{"timestamp":"{time:YYYY-MM-DDTHH:mm:ss.SSSZ}","level":"{level}","service":"'
-            f'{cls.service_name}'
-            '","thread":"{thread}","message":"{message}","logger":"{module}","file":"{file.path}","function":"{function}","line":"{line}"}}'
-        )
+        if not Config.get(AppConfig).log_file_enable:
+            return
+
         cls.__logger.add(
             cls._get_log_file('INFO'),
             level='INFO',
+            colorize=False,
             rotation='50 MB',
             retention='10 days',
             encoding='utf-8',
             filter=lambda record: logging.INFO <= record['level'].no <= logging.WARNING,
-            format=format_str,
+            format=cls._log_format,
             enqueue=True,
         )
         cls.__logger.add(
             cls._get_log_file('ERROR'),
             level='ERROR',
+            colorize=False,
             rotation='50 MB',
             retention='10 days',
             encoding='utf-8',
             filter=lambda record: record['level'].no >= logging.ERROR,
-            format=format_str,
+            format=cls._log_format,
             enqueue=True,
         )
 
@@ -78,9 +82,9 @@ class InterceptHandler(logging.Handler):
         except (ValueError, AttributeError):
             level = record.levelno
 
-        frame = logging.currentframe()
-        depth = 2
-        while frame and frame.f_globals.get('__name__') == 'logging':
+        frame = sys._getframe(0)
+        depth = 0
+        while frame is not None and frame.f_globals.get('__name__') in ('logging', __name__):
             frame = frame.f_back
             depth += 1
 

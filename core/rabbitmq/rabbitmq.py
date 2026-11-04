@@ -44,6 +44,8 @@ class RabbitMQ(metaclass=SingletonMeta):
             asyncio.create_task(self.consume(consumer_class))
 
     async def get_channel(self) -> aio_pika.Channel:
+        if not self.config.enable:
+            raise RuntimeError('RabbitMQ未启用')
         async with self.connection_pool.acquire() as connection:
             return await connection.channel()
 
@@ -78,6 +80,9 @@ class RabbitMQ(metaclass=SingletonMeta):
         await queue.consume(process_message, no_ack=False)
 
     async def publish(self, message: str, routing_key: str) -> None:
+        if not self.config.enable:
+            Logger.get().warning('RabbitMQ未启用, 跳过消息发布')
+            return
         channel = await self.get_channel()
         exchange = await channel.get_exchange(self.config.exchange)
         await exchange.publish(aio_pika.Message(body=message.encode()), routing_key=routing_key)
