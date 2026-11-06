@@ -1,3 +1,4 @@
+import app.queues  # noqa: F401  # 导入消费者模块，完成 RabbitMQ 订阅注册
 from config.mcp_config import MCPConfig
 from core import logger
 from core.dto.common_res import CommonRes

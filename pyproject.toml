@@ -5,7 +5,6 @@ description = "fastapi 脚手架"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "aio-pika>=9.5.5",
     "aiomysql>=0.2.0",
     "apscheduler>=3.11.0",
     "fastapi>=0.115.11",
@@ -19,6 +18,7 @@ dependencies = [
     "uvicorn[standard]>=0.34.0",
     "sqlalchemy>=2.0.41",
     "protobuf>=5.27.2,<6",
+    "faststream[rabbit]==0.7.8",
 ]
 
 [dependency-groups]

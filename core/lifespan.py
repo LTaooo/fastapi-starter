@@ -10,7 +10,7 @@ from core.logger import Logger
 from core.mcp_server import mcp
 from core.mysql.database.app.app_database import AppDatabase
 from core.nacos.nacos import Nacos
-from core.rabbitmq.rabbitmq import RabbitMQ
+from core.rabbitmq import RabbitMQ
 from core.redis.redis import Redis
 
 
@@ -36,16 +36,16 @@ async def _before_startup():
     Config().update_config(await Nacos().get_config(nacos_config.get_config_data()))
     AppDatabase.init()
     await Redis().connect()
-    await RabbitMQ().connect()
+    await RabbitMQ().start()
     await crontab.register()
 
 
 async def _before_shutdown():
+    await RabbitMQ().stop()
     await crontab.shutdown()
     await AppDatabase.close()
     await Redis().disconnect()
     await Nacos().close()
-    await RabbitMQ().close()
 
 
 async def _after_startup():

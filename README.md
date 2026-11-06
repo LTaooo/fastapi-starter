@@ -36,3 +36,8 @@
    ```shell
      pre-commit install
    ```
+
+7. RabbitMQ 升级说明
+   - 旧版本声明的交换机默认为非持久化（durable=False），当前版本使用持久化交换机（durable=True）。
+   - 已启用 RabbitMQ 的环境从旧版本升级时，必须先删除旧交换机（名称默认 `exchange_<app_name>_<app_env>`），否则首次启动会返回 406 PRECONDITION_FAILED。
+   - 删除交换机后，消费者启动时会重新声明交换机并重建绑定。
