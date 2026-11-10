@@ -1,9 +1,7 @@
 import app.queues  # noqa: F401  # 导入消费者模块，完成 RabbitMQ 订阅注册
 from config.mcp_config import MCPConfig
-from core import logger
 from core.dto.common_res import CommonRes
 from core.exception.handle import exception_handle
-from core.logger import Logger
 from core.middleware import middleware
 from routes import routes
 from fastapi import FastAPI
@@ -14,7 +12,6 @@ from core.openapi import openapi
 import uvicorn
 
 app_config = Config.get(AppConfig)
-logger.init()
 app = FastAPI(
     lifespan=lifespan,
     title=app_config.app_name,
@@ -30,7 +27,6 @@ routes.register(app)
 middleware.register(app)
 
 if __name__ == '__main__':
-    Logger.get().info('项目启动中...')
     config = Config.get(AppConfig)
     mcp_config = Config.get(MCPConfig)
     uvicorn.run(

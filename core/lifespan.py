@@ -34,6 +34,7 @@ async def _before_startup():
     nacos_config = Config.get(NacosConfig)
     await Nacos().init(nacos_config)
     Config().update_config(await Nacos().get_config(nacos_config.get_config_data()))
+    Logger.init()
     AppDatabase.init()
     await Redis().connect()
     await RabbitMQ().start()

@@ -16,7 +16,6 @@ class AppConfig(BaseSettings):
     app_env: AppEnvEnum = Field(description='应用环境', default=AppEnvEnum.DEV)
     app_name: str = Field(description='应用名称', default='fastapi-starter')
     app_debug: bool = Field(description='是否开启调试模式', default=False)
-    log_file_enable: bool = Field(description='是否输出文件日志', default=True)
     workers: int = Field(description='工作进程数', default=1, ge=1)
     host: str = Field(description='主机地址', default='0.0.0.0')
     port: int = Field(description='端口号', default=8000)
