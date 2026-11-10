@@ -4,6 +4,7 @@ from app.dto.request.book_req import BookListReq, BookCreateReq, BookBulkUpdateN
 from app.model.book import Book
 from app.repository.book_repository import BookRepository, BookFilter
 from app.repository.params.book_repository_param import BookCreate
+from core.exception.runtime_exception import RuntimeException
 from core.mysql.database.app.app_session import AppSession
 from core.mysql.page_resource import PageResource
 
@@ -25,15 +26,19 @@ class BookService:
         return await self.bookRepository.page_list(session, param)
 
     async def create(self, session: AppSession, req: BookCreateReq) -> Book:
-        result = await self.bookRepository.create(session, BookCreate(**req.model_dump()))
-        await session.commit()
-        return result
+        return await self.bookRepository.create(session, BookCreate(**req.model_dump()))
 
     def _list_req_to_filter(self, req: BookListReq) -> BookFilter:
-        return self.bookRepository.filter_class()(**req.model_dump())
+        return self.bookRepository.filter_class()(page=req.page, limit=req.limit, ids=req.ids, name_like=req.name)
 
     async def bulk_update_name(self, session: AppSession, req: List[BookBulkUpdateNameReq]) -> None:
-        async with session.transaction():
-            for item in req:
-                book = await self.bookRepository.find_or_raise(session, item.id)
-                book.name = item.name
+        if not req:
+            return
+
+        books = await self.bookRepository.list(session, BookFilter(ids=[item.id for item in req]))
+        book_map = {book.id: book for book in books}
+        for item in req:
+            book = book_map.get(item.id)
+            if book is None:
+                raise RuntimeException(f'{item.id} not found')
+            book.name = item.name

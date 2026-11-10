@@ -14,7 +14,7 @@ class BookRepository(BaseRepository[Book, BookFilter]):
     def filter_class(self) -> Type[BookFilter]:
         return BookFilter
 
-    async def _filter(self, sql: Select[tuple[Book]], param: BookFilter) -> Select[tuple[Book]]:
+    def _filter(self, sql: Select[tuple[Book]], param: BookFilter) -> Select[tuple[Book]]:
         """
         基本筛选
         """
