@@ -4,7 +4,7 @@ from core.dto.page_req import PageReq
 
 
 class BookCreateReq(BaseModel):
-    name: str = Field(description='书名')
+    name: str = Field(description='书名', max_length=100)
 
 
 class BookGetReq(BaseModel):
@@ -19,4 +19,4 @@ class BookListReq(PageReq, BaseModel):
 
 class BookBulkUpdateNameReq(BaseModel):
     id: int = Field(examples=[1, 2], description='书籍id', gt=0)
-    name: str = Field(description='书名')
+    name: str = Field(description='书名', max_length=100)
