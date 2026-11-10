@@ -5,22 +5,22 @@
 ### 代码结构规范
 
 1. 单个方法不超过 60 行
-    - 超过时必须拆分，除非有充分理由（如大型 switch、DTO 构建器）
+    - 超过时必须拆分，除非有充分理由（如大型 match/case 分支、DTO 构建器）
 2. 减少嵌套 if/else，优先卫语句提前 return
 
 
 ### 日志规范
 
 日志应当保持描述在前， 参数在后，并且有空格分隔
-```
-// 正确示例
-Logger.get().info("任务开始 taskId={}",taskId);
+```python
+# 正确示例
+Logger.get().info('任务开始 taskId={}', taskId)
 
-// 错误示例
-Logger.get().info("taskId={}任务开始",taskId);
+# 错误示例
+Logger.get().info('taskId={}任务开始', taskId)
 ```
 
 ### 注释补充
 
-1. 所有方法必须有注释/Javadoc
-2. 修改代码时必须同步更新注释
+1. 所有方法必须有文档字符串（docstring）
+2. 修改代码时必须同步更新文档字符串
