@@ -32,11 +32,12 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
         )
         cls._engine = create_async_engine(
             url,
-            pool_size=5,
-            max_overflow=50,
+            pool_size=config.pool_size,
+            max_overflow=config.max_overflow,
+            pool_timeout=config.pool_timeout,
+            pool_recycle=config.pool_recycle,
+            pool_pre_ping=config.pool_pre_ping,
             echo=config.echo,
-            pool_recycle=3600,  # 60分钟回收连接
-            pool_pre_ping=True,  # 连接前检查
         )
 
     @classmethod
