@@ -3,10 +3,12 @@ from typing import Type
 from sqlalchemy import Select
 
 from app.repository.params.book_repository_param import BookFilter
+from core.di.injectable import injectable
 from core.mysql.base_repository import BaseRepository
 from app.model.book import Book
 
 
+@injectable
 class BookRepository(BaseRepository[Book, BookFilter]):
     def _model_class(self) -> Type[Book]:
         return Book

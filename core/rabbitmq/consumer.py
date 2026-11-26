@@ -27,9 +27,9 @@ def register_consumer(
     ack_policy: AckPolicy = AckPolicy.REJECT_ON_ERROR,
     channel: Channel | None = None,
 ) -> Callable[[ConsumerHandler], ConsumerHandler]:
-    """登记消费者；模块导入时调用，避免在导入阶段建立连接。
+    """返回消费者登记函数，仅记录订阅信息，不建立连接。
 
-    所有消费者必须在 RabbitMQ.start() 之前完成注册，broker 启动后新增的注册不会生效。
+    所有消费者必须在首次构建 broker 前显式完成注册，构建后新增的注册不会自动绑定。
     """
 
     def decorator(handler: ConsumerHandler) -> ConsumerHandler:

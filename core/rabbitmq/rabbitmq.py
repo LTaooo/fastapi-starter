@@ -41,10 +41,7 @@ def build_broker(config: RabbitMQConfig) -> RabbitBroker:
 
 def _build_url(config: RabbitMQConfig) -> str:
     """生成 AMQP URL；用户名、密码和 vhost 均做 URL 转义。"""
-    return (
-        f'amqp://{quote(config.username, safe="")}:{quote(config.password, safe="")}'
-        f'@{config.host}:{config.port}/{quote(config.vhost, safe="")}'
-    )
+    return f'amqp://{quote(config.username, safe="")}:{quote(config.password, safe="")}@{config.host}:{config.port}/{quote(config.vhost, safe="")}'
 
 
 class RabbitMQ(metaclass=SingletonMeta):
@@ -58,9 +55,12 @@ class RabbitMQ(metaclass=SingletonMeta):
         return Config.get(RabbitMQConfig).enable
 
     def _get_broker(self) -> RabbitBroker:
-        if self._broker is None:
-            self._broker = build_broker(Config.get(RabbitMQConfig))
-        return self._broker
+        """返回已创建的 broker，首次调用时按当前配置构建。"""
+        broker = self._broker
+        if broker is None:
+            broker = build_broker(Config.get(RabbitMQConfig))
+            self._broker = broker
+        return broker
 
     async def start(self) -> None:
         """启动 broker；消费者注册表在此时一次性绑定，调用前必须完成全部 register_consumer 调用。"""
@@ -69,7 +69,7 @@ class RabbitMQ(metaclass=SingletonMeta):
         await self._get_broker().start()
         self._started = True
         names = ', '.join(consumer.queue.name for consumer in get_consumers()) or '无'
-        Logger.get().info(f'RabbitMQ连接成功, 消费者: {names}')
+        Logger.get().info('RabbitMQ连接成功 consumers={}', names)
 
     async def stop(self) -> None:
         broker = self._broker
@@ -80,7 +80,7 @@ class RabbitMQ(metaclass=SingletonMeta):
         try:
             await broker.stop()
         except Exception as e:
-            Logger.get().error(f'RabbitMQ关闭失败: {e}')
+            Logger.get().error('RabbitMQ关闭失败 reason={}', e)
 
     async def publish(self, message: Any, routing_key: str, exchange: RabbitExchange | str | None = None) -> None:
         """发布消息；未启用时跳过，未启动时抛出异常。"""
