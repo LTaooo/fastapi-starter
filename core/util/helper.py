@@ -27,11 +27,7 @@ class Helper:
 
     @staticmethod
     def exception_str(e: Exception, replace: bool) -> str:
-        filtered = [
-            line
-            for line in traceback.format_tb(e.__traceback__)
-            if 'site-packages/starlette' not in line and 'site-packages/fastapi' not in line
-        ]
+        filtered = [line for line in traceback.format_tb(e.__traceback__) if 'site-packages/starlette' not in line and 'site-packages/fastapi' not in line]
         tb_str = ''.join(filtered)
         tb_str += f'\n {str(e)}'
         if replace:

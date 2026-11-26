@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.exception.runtime_exception import RuntimeException
+from core.exception.biz_exception import BizException
 from core.mysql.orm.auto_time import AutoTime
 from core.mysql.page_resource import PageResource
 from core.types.types import SQL_MODEL_TYPE, FILTER_TYPE
@@ -25,10 +25,10 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
 
     async def find_or_raise(self, session: AsyncSession, pk: int, message: str | None = None) -> SQL_MODEL_TYPE:
         if not message:
-            message = f'{pk} not found'
+            message = f'记录不存在 id={pk}'
         model = await self.find(session, pk)
         if not model:
-            raise RuntimeException(message)
+            raise BizException(message)
         return model
 
     async def get_one(self, session: AsyncSession, param: FILTER_TYPE) -> SQL_MODEL_TYPE | None:
@@ -45,7 +45,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
         primary_field = model.get_primary_field()
         for key, value in update_data.items():
             if key not in columns or key == primary_field:
-                raise RuntimeException(f'Invalid update field: {key}')
+                raise ValueError(f'更新数据含不可写字段 field={key}')
             setattr(model, key, value)
         return await self.save(session, model)
 
@@ -96,7 +96,7 @@ class BaseRepository(Generic[SQL_MODEL_TYPE, FILTER_TYPE], ABC):
     async def delete_by_id(self, session: AsyncSession, pk: int) -> None:
         model = await self.find(session, pk)
         if not model:
-            raise RuntimeException(f'Model with id {pk} not found')
+            raise BizException(f'记录不存在 id={pk}')
         await session.delete(model)
 
     async def delete(self, session: AsyncSession, model: SQL_MODEL_TYPE) -> None:

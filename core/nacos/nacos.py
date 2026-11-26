@@ -3,7 +3,6 @@ from typing import Callable
 import yaml
 
 from config.nacos_config import NacosConfig
-from core.exception.runtime_exception import RuntimeException
 from core.singleton_meta import SingletonMeta
 from v2.nacos import (
     NacosNamingService,
@@ -38,7 +37,7 @@ class Nacos(metaclass=SingletonMeta):
     async def register_service(self, service: RegisterInstanceParam):
         """注册服务实例；未创建命名服务时拒绝调用。"""
         if self._naming_service is None:
-            raise RuntimeException('Nacos服务注册未启用，无法注册服务')
+            raise RuntimeError('Nacos服务注册未启用，无法注册服务')
         await self._naming_service.register_instance(service)
 
     async def listener_config(self, data_id: str, listener: Callable):
