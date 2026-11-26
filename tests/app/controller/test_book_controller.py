@@ -73,9 +73,7 @@ async def test_book_repository_query(app_session: AppSession):
 async def test_bulk_update_name(client: AsyncClient):
     ids = [await _create_book(client, _unique('bulk')) for _ in range(2)]
     updated_prefix = _unique('bulk-updated')
-    books = [
-        BookBulkUpdateNameReq(id=book_id, name=f'{updated_prefix}-{index}').model_dump() for index, book_id in enumerate(ids)
-    ]
+    books = [BookBulkUpdateNameReq(id=book_id, name=f'{updated_prefix}-{index}').model_dump() for index, book_id in enumerate(ids)]
     response = await client.post('/api/book/bulk_update_name', json={'books': books})
     assert response.status_code == 200
     assert response.json()['code'] == StatusEnum.success.value

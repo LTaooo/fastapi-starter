@@ -5,6 +5,7 @@ from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession
 
 from config.mysql_config import MysqlConfig
+from core.logger import Logger
 from core.singleton_meta import SingletonMeta
 
 _SESSION = TypeVar('_SESSION', bound=AsyncSession)
@@ -15,13 +16,22 @@ class SingletonABCMeta(ABCMeta, SingletonMeta):
 
 
 class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
+    CONNECT_TIMEOUT_SECONDS: ClassVar[int] = 10
     _engine: ClassVar[AsyncEngine | None] = None
 
     @classmethod
     def init(cls):
+        """按配置创建连接池；数据库未启用时跳过。"""
         config = cls.get_config()
         if not config.enable:
             return
+        Logger.get().info(
+            '数据库连接初始化 source={} host={} port={} database={}',
+            cls.__name__,
+            config.host,
+            config.port,
+            config.database,
+        )
         url = URL.create(
             drivername='mysql+aiomysql',
             username=config.user,
@@ -32,6 +42,7 @@ class BaseMysql(ABC, Generic[_SESSION], metaclass=SingletonABCMeta):
         )
         cls._engine = create_async_engine(
             url,
+            connect_args={'connect_timeout': cls.CONNECT_TIMEOUT_SECONDS},
             pool_size=config.pool_size,
             max_overflow=config.max_overflow,
             pool_timeout=config.pool_timeout,

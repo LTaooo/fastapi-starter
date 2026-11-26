@@ -1,5 +1,3 @@
-import app.queues  # noqa: F401  # 导入消费者模块，完成 RabbitMQ 订阅注册
-from config.mcp_config import MCPConfig
 from core.dto.common_res import CommonRes
 from core.exception.handle import exception_handle
 from core.middleware import middleware
@@ -9,6 +7,7 @@ from config.app_config import AppConfig
 from core.config import Config
 from core.lifespan import lifespan
 from core.openapi import openapi
+from core import documentation
 import uvicorn
 
 app_config = Config.get(AppConfig)
@@ -17,22 +16,23 @@ app = FastAPI(
     title=app_config.app_name,
     debug=app_config.app_debug,
     responses={200: CommonRes(data=None).model_dump()},
-    docs_url='/docs' if not app_config.is_prod() else None,
-    openapi_url='/openapi.json' if not app_config.is_prod() else None,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
     root_path=app_config.app_root_path,
 )
 exception_handle.register(app)
 app.openapi = openapi(app.openapi)
+documentation.register(app, app_config)
 routes.register(app)
 middleware.register(app)
 
 if __name__ == '__main__':
     config = Config.get(AppConfig)
-    mcp_config = Config.get(MCPConfig)
     uvicorn.run(
         'main:app',
-        host=config.host,
-        port=config.port,
-        workers=1 if mcp_config.enable else config.workers,
+        host=config.app_host,
+        port=config.app_port,
+        workers=config.app_workers,
         log_config=None,
     )

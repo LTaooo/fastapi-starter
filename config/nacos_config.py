@@ -1,4 +1,3 @@
-import tomllib
 from typing import Callable
 from pydantic import Field, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,12 +14,8 @@ class NacosListenerConfig(BaseModel):
     listener: Callable = Field(description='监听器')
 
 
-async def _config_listener(tenant: str, data_id: str, group: str, content: str):
-    """
-    nacos配置监听器
-    """
-    content_dict = tomllib.loads(content)
-    print(content_dict)
+async def _config_listener(tenant: str, data_id: str, group: str, content: str) -> None:
+    """Nacos 配置变更监听器；当前仅保留回调入口，不执行配置重载。"""
 
 
 _app_config = Config.get(AppConfig)
@@ -42,7 +37,7 @@ class NacosConfig(BaseSettings):
             RegisterInstanceParam(
                 service_name=_app_config.app_name,
                 ip='127.0.0.1',
-                port=_app_config.port,
+                port=_app_config.app_port,
                 group_name=self.group,
                 weight=1,
                 ephemeral=True,

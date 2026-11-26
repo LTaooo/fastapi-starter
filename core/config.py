@@ -1,4 +1,4 @@
-from typing import Type, TypeVar, ClassVar
+from typing import Type, TypeVar, ClassVar, cast
 from pydantic import BaseModel
 
 from config.base.base_nacos_config import BaseNacosConfig
@@ -8,14 +8,16 @@ _T = TypeVar('_T', bound=BaseModel)
 
 class Config:
     __origin_config: ClassVar[dict] = {}
-    _configs: ClassVar[dict] = {}
+    _configs: ClassVar[dict[type[BaseModel], BaseModel]] = {}
 
     @classmethod
     def get(cls, config_class: Type[_T]) -> _T:
-        key = config_class.__name__
-        if cls._configs.get(key) is None:
-            cls._configs[key] = cls.__get(config_class)
-        return cls._configs[key]
+        """按配置类型缓存实例，隔离不同模块中同名的配置类。"""
+        instance = cls._configs.get(config_class)
+        if instance is None:
+            instance = cls.__get(config_class)
+            cls._configs[config_class] = instance
+        return cast(_T, instance)
 
     @classmethod
     def __get(cls, config_class: Type[_T]) -> _T:

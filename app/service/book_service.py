@@ -4,11 +4,13 @@ from app.dto.request.book_req import BookListReq, BookCreateReq, BookBulkUpdateN
 from app.model.book import Book
 from app.repository.book_repository import BookRepository, BookFilter
 from app.repository.params.book_repository_param import BookCreate
-from core.exception.runtime_exception import RuntimeException
+from core.di.injectable import injectable
+from core.exception.biz_exception import BizException
 from core.mysql.database.app.app_session import AppSession
 from core.mysql.page_resource import PageResource
 
 
+@injectable
 class BookService:
     def __init__(self, book_repository: BookRepository):
         self.bookRepository = book_repository
@@ -40,5 +42,5 @@ class BookService:
         for item in req:
             book = book_map.get(item.id)
             if book is None:
-                raise RuntimeException(f'{item.id} not found')
+                raise BizException(f'书籍不存在 id={item.id}')
             book.name = item.name

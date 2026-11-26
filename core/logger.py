@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import TextIO
 
 from loguru import logger
 
@@ -40,6 +41,18 @@ class Logger:
     """loguru 的初始化入口。应用启动时调用一次 init，运行期通过 get 获取 logger。"""
 
     _is_init: bool = False
+    _stream: TextIO | None = None
+    _console_level: str | None = None
+
+    @classmethod
+    def use_stderr(cls) -> None:
+        """把控制台日志出口切到标准错误，须在 init 之前调用；面向机器的命令用标准输出交付数据，诊断信息不与之混流。"""
+        cls._stream = sys.stderr
+
+    @classmethod
+    def use_console_level(cls, level: str | None) -> None:
+        """覆盖控制台日志级别，须在 init 之前调用；传空表示沿用配置级别，日志文件始终按配置级别记录。"""
+        cls._console_level = level
 
     @classmethod
     def init(cls) -> None:
@@ -53,8 +66,8 @@ class Logger:
 
         logger.remove()
         logger.add(
-            sys.stdout,
-            level=log_level,
+            cls._stream or sys.stdout,
+            level=cls._console_level or log_level,
             colorize=None,
             format=_LOG_FORMAT,
             backtrace=True,
@@ -63,7 +76,7 @@ class Logger:
 
         if log_config.file_enable:
             # 多进程同时轮转同一个文件会产生竞争，按进程拆分文件；单进程保持固定文件名。
-            with_pid = app_config.workers > 1
+            with_pid = app_config.app_workers > 1
             logger.add(
                 cls._get_log_file(app_config.app_name, 'info', with_pid),
                 level=log_level,

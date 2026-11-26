@@ -1,10 +1,8 @@
-from typing import Generic, TypeVar
+from typing import Generic
 
 from pydantic import BaseModel, Field
 
 from core.types.types import MODEL_TYPE
-
-PAGE_MODEL_TYPE = TypeVar('PAGE_MODEL_TYPE', bound=BaseModel)
 
 
 class PageRes(BaseModel, Generic[MODEL_TYPE]):
@@ -14,5 +12,5 @@ class PageRes(BaseModel, Generic[MODEL_TYPE]):
     data: list[MODEL_TYPE] = Field(title='数据列表')
 
     @classmethod
-    def from_page(cls, data: list[PAGE_MODEL_TYPE], page: int, limit: int, total: int) -> 'PageRes[PAGE_MODEL_TYPE]':
+    def from_page(cls, data: list[MODEL_TYPE], page: int, limit: int, total: int) -> 'PageRes[MODEL_TYPE]':
         return PageRes(page=page, limit=limit, total=total, data=data)

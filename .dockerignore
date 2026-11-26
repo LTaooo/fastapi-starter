@@ -1,0 +1,36 @@
+# 版本控制、编辑器与 AI 工具配置
+.git
+.gitignore
+.idea
+.vscode
+.claude
+
+# 本地凭据；容器内配置通过环境变量或挂载文件提供
+.env
+.env.*
+
+# Python 环境与产物
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+*.egg-info
+build
+
+# 本地运行产物
+logs
+runtime
+nacos_data
+*.diff
+
+# 仅开发期使用
+tests
+docs
+.pre-commit-config.yaml
+CLAUDE.md
+.python-version
+pyrightconfig.json
+ruff.toml
+Dockerfile
+.dockerignore

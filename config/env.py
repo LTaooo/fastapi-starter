@@ -3,7 +3,9 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-BASE_ENV_FILE = Path('.env')
+from core.util.helper import Helper
+
+BASE_ENV_FILE = Path(Helper.get_root_path()) / '.env'
 DEFAULT_APP_ENV = 'dev'
 
 
